@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BalanceNews AI - 국내·해외·북한 3대 쟁점 중립 뉴스 플랫폼</title>
+  <title>BalanceNews AI - 국내·해외·북한·이색해외 정통 중립 뉴스</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -14,21 +14,24 @@
       background-color: rgba(16, 185, 129, 0.08);
       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     }
-    @keyframes pulse-subtle {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
+    .article-text {
+      line-height: 1.85;
+      letter-spacing: -0.015em;
     }
-    .live-pulse { animation: pulse-subtle 2s infinite ease-in-out; }
+    .article-text p {
+      margin-bottom: 1.25rem;
+      text-align: justify;
+    }
   </style>
 </head>
 <body class="bg-[var(--background)] text-[var(--foreground)] antialiased min-h-screen p-4 md:p-6 font-sans">
-  <div class="max-w-5xl mx-auto space-y-6">
+  <div class="max-w-4xl mx-auto space-y-6">
 
-    <!-- Top Daily Edition Header -->
+    <!-- Top Navigation Header -->
     <header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         
-        <!-- Brand & Daily Meta -->
+        <!-- Brand -->
         <div class="flex items-center gap-3.5">
           <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white text-2xl shadow-md">
             ⚖️
@@ -36,540 +39,343 @@
           <div>
             <div class="flex items-center gap-2">
               <h1 class="text-xl md:text-2xl font-bold tracking-tight text-[var(--foreground)]">BalanceNews AI</h1>
-              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 live-pulse"></span>
-                국내·해외·북한 균형 에디션
+              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                정통 중립 저널리즘
               </span>
             </div>
             <p class="text-xs md:text-sm text-[var(--muted-foreground)] mt-0.5">
-              국내 보도에서 다루지 않거나 편향되기 쉬운 해외 외신(Reuters, BBC, CSIS) 심층 정보를 종합하여 5:5 중립 기사로 제공합니다.
+              국내외 외신 심층 보도를 교차 검증하여, 가치판단 없는 팩트와 양대 진영의 균형 잡힌 시각을 정통 신문 기사 형식으로 전합니다.
             </p>
           </div>
         </div>
 
-        <!-- Live Refresh & Countdown Controls -->
+        <!-- Controls -->
         <div class="flex flex-wrap items-center gap-2">
-          <div class="text-right hidden sm:block">
-            <div class="text-xs font-bold text-[var(--foreground)] flex items-center gap-1" id="currentDateDisplay">
-              📅 2026년 10월 25일 에디션
-            </div>
-            <div class="text-xs text-[var(--muted-foreground)] flex items-center gap-1">
-              <span>⏱️ 다음 자동 갱신까지:</span>
-              <span id="countdownTimer" class="font-mono font-semibold text-emerald-600 dark:text-emerald-400">00:00:00</span>
-            </div>
-          </div>
+          <button id="btnOpenArchive" class="px-3 py-2 text-xs md:text-sm font-semibold rounded-xl border border-[var(--border)] hover:bg-[var(--card)]/80 transition-colors flex items-center gap-1.5 text-[var(--foreground)]">
+            <span>📚 전체 기사 목록</span>
+          </button>
 
-          <button id="btnAutoRefresh" class="px-4 py-2.5 text-xs md:text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all flex items-center gap-2">
+          <button id="btnAutoRefresh" class="px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all flex items-center gap-1.5">
             <span id="refreshIcon" class="text-base transition-transform">🔄</span>
-            <span>최신 피드 새로고침</span>
+            <span>기사 새로고침</span>
           </button>
         </div>
       </div>
 
-      <!-- Fresh Update Alert Toast -->
-      <div id="updateBanner" class="hidden mt-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs font-semibold text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
-        <span class="flex items-center gap-2">
-          <span>✨</span>
-          <span id="updateBannerText">오늘의 국내 1개 + 해외 1개 + 북한 1개 중립 기사가 성공적으로 동기화되었습니다!</span>
-        </span>
-        <button id="btnCloseBanner" class="text-emerald-600 hover:text-emerald-800 text-sm font-bold">✕</button>
-      </div>
-
-      <!-- 3 Fixed Pillars: [국내 1개] + [해외 1개] + [북한 1개] Tabs -->
+      <!-- 4 Clean Category Tabs: [국내] [해외] [북한] [이색 해외] -->
       <div class="mt-5 pt-4 border-t border-[var(--border)]">
-        <div class="flex items-center justify-between mb-2.5">
-          <div class="text-xs font-semibold text-[var(--muted-foreground)] flex items-center gap-1.5">
-            <span>🌐</span>
-            <span>오늘의 3대 필러 에디션 (국내 1개 • 해외 1개 • 북한 1개):</span>
-          </div>
-          <span class="text-xs text-[var(--muted-foreground)]">선택 시 해당 기사로 즉시 전환</span>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold text-[var(--muted-foreground)]">분야별 기사 선택:</span>
+          <span class="text-xs text-[var(--muted-foreground)]" id="editionLabel">에디션 1 / 3</span>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="pillarTabsContainer">
-          <!-- Populated dynamically -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="categoryTabsContainer">
+          <!-- Populated dynamically: 국내, 해외, 북한, 이색 해외 -->
         </div>
       </div>
     </header>
 
-    <!-- MAIN NEUTRAL ARTICLE DISPLAY -->
-    <main id="articleContainer" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8 shadow-sm space-y-7 relative">
+    <!-- MAIN ARTICLE READING VIEW (Authentic Newspaper Format) -->
+    <main id="articleContainer" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-10 shadow-sm space-y-6 relative">
 
       <!-- Refreshing Overlay Spinner -->
       <div id="loadingOverlay" class="hidden absolute inset-0 bg-[var(--card)]/80 backdrop-blur-xs rounded-2xl z-20 flex flex-col items-center justify-center space-y-3">
         <div class="w-10 h-10 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
         <p class="text-xs md:text-sm font-bold text-emerald-600 dark:text-emerald-400">
-          국내외 외신(Reuters, BBC, CSIS) 교차 분석 및 중립 기사 합성 중...
+          최신 외신 및 팩트 교차 검증 중립 기사 로딩 중...
         </p>
       </div>
 
-      <!-- Article Header & Metadata -->
-      <div class="space-y-3 border-b border-[var(--border)] pb-6">
+      <!-- Article Header & Byline -->
+      <div class="space-y-3 border-b border-[var(--border)] pb-5">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <span id="badgeCategory" class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              🇰🇷 국내 주요 쟁점
+          <div class="flex items-center gap-2 text-xs">
+            <span id="badgeCategory" class="px-2.5 py-1 rounded-md font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              국내
             </span>
-            <span id="badgeOrigin" class="text-xs font-semibold px-2 py-0.5 rounded bg-[var(--background)] border border-[var(--border)] text-[var(--muted-foreground)]">
+            <span id="badgeOrigin" class="text-[var(--muted-foreground)]">
               외신 교차 검증
             </span>
-            <span class="text-xs text-[var(--muted-foreground)]">•</span>
-            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-              <span>⚖️</span> 중립 지수 0.0 (50:50 균등 배분)
+            <span class="text-[var(--muted-foreground)]">•</span>
+            <span class="text-emerald-600 dark:text-emerald-400 font-medium">
+              ⚖️ 중립 지수 0.0 균형
             </span>
           </div>
 
           <div class="flex items-center gap-2">
-            <button id="btnCopy" class="px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--border)]/30 text-xs font-semibold flex items-center gap-1.5 transition-colors">
-              📋 기사 복사
+            <button id="btnCopy" class="px-2.5 py-1 rounded-lg border border-[var(--border)] hover:bg-[var(--border)]/30 text-xs font-semibold flex items-center gap-1 transition-colors">
+              📋 복사
             </button>
-            <button id="btnDownload" class="px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--border)]/30 text-xs font-semibold flex items-center gap-1.5 transition-colors">
-              📥 마크다운
+            <button id="btnDownload" class="px-2.5 py-1 rounded-lg border border-[var(--border)] hover:bg-[var(--border)]/30 text-xs font-semibold flex items-center gap-1 transition-colors">
+              📥 저장
             </button>
           </div>
         </div>
 
-        <h2 id="articleHeadline" class="text-xl md:text-2xl font-extrabold text-[var(--foreground)] leading-snug tracking-tight">
-          <!-- Headline filled dynamically -->
-        </h2>
+        <h1 id="articleHeadline" class="text-xl md:text-2xl font-extrabold text-[var(--foreground)] leading-snug tracking-tight">
+          <!-- Article Title -->
+        </h1>
 
-        <p id="articleSummary" class="text-xs md:text-sm text-[var(--muted-foreground)] leading-relaxed bg-[var(--background)] p-3.5 rounded-xl border border-[var(--border)]">
-          <!-- Summary filled dynamically -->
+        <p id="articleSubheadline" class="text-xs md:text-sm text-[var(--muted-foreground)] font-medium leading-relaxed">
+          <!-- Subtitle / Hook -->
         </p>
       </div>
 
-      <!-- 1-Minute Fact Sheet -->
-      <section class="bg-slate-50/60 dark:bg-slate-900/40 border border-[var(--border)] rounded-xl p-4 md:p-5">
-        <div class="flex items-center gap-2 mb-3 text-xs md:text-sm font-bold text-emerald-700 dark:text-emerald-400">
+      <!-- 1. Key 3-Line Summary Box (요점 따로 분리) -->
+      <section class="bg-slate-50 dark:bg-slate-900/40 border border-[var(--border)] rounded-xl p-4 md:p-5 space-y-2">
+        <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400">
           <span>📌</span>
-          <span>1분 핵심 팩트 브리핑 (국내외 언론 및 전문 싱크탱크가 확인한 객관적 사실)</span>
+          <span>핵심 팩트 요약 3줄</span>
         </div>
-        <ul id="factList" class="space-y-2 text-xs md:text-sm text-[var(--foreground)] list-disc list-inside leading-relaxed">
-          <!-- Filled dynamically -->
+        <ul id="summaryBullets" class="space-y-1.5 text-xs md:text-sm text-[var(--foreground)] list-disc list-inside leading-relaxed">
+          <!-- 3 Bullets populated dynamically -->
         </ul>
       </section>
 
-      <!-- Side-by-Side Perspectives Matrix -->
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Right / Proponent Side -->
-        <div class="p-4 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/30 dark:bg-rose-950/20 space-y-2.5">
-          <div class="flex items-center gap-2 text-xs md:text-sm font-bold text-rose-600 dark:text-rose-400 border-b border-rose-200 dark:border-rose-900/30 pb-2">
+      <!-- 2. Side-by-Side Perspectives Quick Bar (핵심 쟁점 대조) -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs md:text-sm">
+        <div class="p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/30 dark:bg-rose-950/20 space-y-1">
+          <div class="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
             <span>🏛️</span>
-            <span id="perspectiveRightLabel">추진 및 주류 안보·시장 시각</span>
+            <span id="perspectiveRightTitle">주류·정부·추진 측 논거</span>
           </div>
-          <ul id="perspectiveRightList" class="space-y-1.5 text-xs text-[var(--foreground)] list-disc list-inside leading-relaxed">
-            <!-- Dynamically populated -->
-          </ul>
+          <p id="perspectiveRightText" class="text-xs text-[var(--foreground)] leading-relaxed">
+            <!-- Right Perspective summary -->
+          </p>
         </div>
 
-        <!-- Left / Critic Side -->
-        <div class="p-4 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/30 dark:bg-blue-950/20 space-y-2.5">
-          <div class="flex items-center gap-2 text-xs md:text-sm font-bold text-blue-600 dark:text-blue-400 border-b border-blue-200 dark:border-blue-900/30 pb-2">
+        <div class="p-3.5 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/30 dark:bg-blue-950/20 space-y-1">
+          <div class="font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
             <span>👥</span>
-            <span id="perspectiveLeftLabel">비판 및 현지·이해관계자 시각</span>
+            <span id="perspectiveLeftTitle">비판·시민사회·현지 측 논거</span>
           </div>
-          <ul id="perspectiveLeftList" class="space-y-1.5 text-xs text-[var(--foreground)] list-disc list-inside leading-relaxed">
-            <!-- Dynamically populated -->
-          </ul>
+          <p id="perspectiveLeftText" class="text-xs text-[var(--foreground)] leading-relaxed">
+            <!-- Left Perspective summary -->
+          </p>
         </div>
       </section>
 
-      <!-- Full Centrist Article Body -->
-      <article class="space-y-5 text-xs md:text-sm leading-relaxed text-[var(--foreground)] pt-2">
-        
-        <!-- Lead -->
-        <div class="p-4 rounded-xl bg-[var(--background)] border border-[var(--border)]">
-          <h3 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">【기사 요약 리드문】</h3>
-          <p id="bodyLead" class="font-medium text-sm md:text-base leading-relaxed text-[var(--foreground)]">
-            <!-- Lead -->
-          </p>
-        </div>
-
-        <!-- Section 1 -->
-        <div class="space-y-1.5">
-          <h3 class="text-sm md:text-base font-bold text-[var(--foreground)] flex items-center gap-2">
-            <span class="w-1.5 h-4 bg-emerald-500 rounded-sm"></span>
-            1. 공통 사실관계 및 사건·정책 배경
-          </h3>
-          <p id="bodyBackground" class="text-[var(--muted-foreground)] leading-relaxed pl-3.5 border-l-2 border-[var(--border)]">
-            <!-- Background -->
-          </p>
-        </div>
-
-        <!-- Section 2 -->
-        <div class="space-y-1.5">
-          <h3 class="text-sm md:text-base font-bold text-[var(--foreground)] flex items-center gap-2">
-            <span class="w-1.5 h-4 bg-rose-500 rounded-sm"></span>
-            2. 추진 및 주류 현실주의 진영의 시각과 핵심 논거
-          </h3>
-          <p id="bodyConservative" class="text-[var(--muted-foreground)] leading-relaxed pl-3.5 border-l-2 border-[var(--border)]">
-            <!-- Conservative -->
-          </p>
-        </div>
-
-        <!-- Section 3 -->
-        <div class="space-y-1.5">
-          <h3 class="text-sm md:text-base font-bold text-[var(--foreground)] flex items-center gap-2">
-            <span class="w-1.5 h-4 bg-blue-500 rounded-sm"></span>
-            3. 비판 및 대안적 관점의 시각과 핵심 논거
-          </h3>
-          <p id="bodyProgressive" class="text-[var(--muted-foreground)] leading-relaxed pl-3.5 border-l-2 border-[var(--border)]">
-            <!-- Progressive -->
-          </p>
-        </div>
-
-        <!-- Section 4 -->
-        <div class="space-y-1.5">
-          <h3 class="text-sm md:text-base font-bold text-[var(--foreground)] flex items-center gap-2">
-            <span class="w-1.5 h-4 bg-teal-500 rounded-sm"></span>
-            4. 향후 전망 및 사회적·국제적 합의 과제
-          </h3>
-          <p id="bodyFuture" class="text-[var(--muted-foreground)] leading-relaxed pl-3.5 border-l-2 border-[var(--border)]">
-            <!-- Future -->
-          </p>
-        </div>
-
+      <!-- 3. REAL NEWSPAPER ARTICLE BODY (정통 신문 기사 줄글 본문) -->
+      <article class="article-text text-sm md:text-base text-[var(--foreground)] pt-2" id="fullArticleBody">
+        <!-- Natural journalist-written paragraphs will be inserted here -->
       </article>
 
+      <!-- Article Footer Byline -->
+      <div class="border-t border-[var(--border)] pt-4 flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+        <span id="articleByline">【BalanceNews AI 뉴스룸】</span>
+        <span>로이터·BBC·외신 종합 검증</span>
+      </div>
+
     </main>
+
+    <!-- ARCHIVE MODAL -->
+    <div id="archiveModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
+        <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
+          <div>
+            <h3 class="text-base font-bold text-[var(--foreground)] flex items-center gap-2">
+              <span>📚</span> 전체 쟁점 기사 목록
+            </h3>
+            <p class="text-xs text-[var(--muted-foreground)]">읽고 싶은 기사를 클릭하시면 바로 본문으로 이동합니다.</p>
+          </div>
+          <button id="btnCloseArchive" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-xl font-bold p-1">✕</button>
+        </div>
+
+        <div class="overflow-y-auto space-y-3 pr-1 text-xs md:text-sm" id="archiveItemsList">
+          <!-- Archive list -->
+        </div>
+      </div>
+    </div>
 
   </div>
 
   <script type="module">
-    // Multi-edition Pool with strict [국내 1개 + 해외 1개 + 북한 1개] structure
-    const GLOBAL_EDITIONS = [
-      // Edition 1: Today's Featured Edition
+    // Multi-edition database with [국내, 해외, 북한, 이색 해외]
+    const EDITIONS = [
+      // Edition 1: Featured
       {
-        id: "edition_1",
-        name: "오늘의 글로벌·한반도 에디션 1",
+        name: "에디션 1 (최근 주요 갈등 및 방글라데시 혁명)",
         articles: [
-          // 1. 국내 1개
+          // 1. 국내
           {
-            pillar: "국내 1개",
-            pillarIcon: "🇰🇷",
-            category: "국내 경제 / 부동산",
-            origin: "국내 경제·부동산 심층 분석",
-            headline: "가계부채 1900조 관리 vs 실수요자 대출 절벽… 주담대·디딤돌 규제 둘러싼 거시 안정과 주거 사다리의 충돌",
-            summary: "금융당국과 은행권의 주택담보대출 및 디딤돌 대출 한도 조이기를 둘러싸고, 1,900조 원을 넘어선 가계부채 관리와 수도권 집값 안정이라는 목표와, 내 집 마련을 준비하던 서민·신혼부부 등 실수요자의 대출 절벽 피해가 첨예하게 맞서고 있습니다.",
-            facts: [
-              "한국은행 및 금융당국 집계 결과 한국 가계신용(가계부채) 잔액이 사상 최대치인 1,900조 원 안팎에 도달하여 GDP 대비 가계부채 비율이 주요국 최상위권을 유지함.",
-              "정부와 주요 시중은행은 스트레스 DSR 2단계 도입과 함께 주택담보대출 한도 축소 및 다주택자 대출 제한을 시행함.",
-              "국토교통부와 HUG가 서민 정책대출인 디딤돌 대출 한도 축소를 추진했다가 무주택 실수요자들의 반발로 한시적 유예 및 보완책을 발표함.",
-              "서울 및 수도권 아파트 매매 거래량이 규제 직후 급감하며 부동산 매수 심리가 관망세로 전환됨."
+            category: "국내",
+            badgeColor: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+            origin: "국내 경제·부동산 종합",
+            headline: "가계부채 1900조 관리냐, 내 집 마련 주거 사다리냐… 주담대·디딤돌 규제 후폭풍",
+            subheadline: "수도권 집값 불안과 가계부채 억제를 위한 금융 조이기에 서민 실수요자 반발 확산",
+            byline: "【서울=경제부 종합】",
+            summaryBullets: [
+              "한국 가계부채 총액이 1,900조 원 안팎에 도달하여 GDP 대비 부채비율이 주요국 최상위권을 유지함.",
+              "정부와 시중은행이 스트레스 DSR 2단계 및 주담대 한도를 조이고 디딤돌 대출 한도 축소를 추진함.",
+              "무주택 실수요자들의 거센 반발로 국토부는 한시적 유예 및 보완책을 발표하며 정책 혼선이 지속됨."
             ],
             perspectives: {
               right: {
-                label: "정부 및 금융당국 시각 (거시건전성·부채 관리)",
-                args: [
-                  "가계부채가 경제 규모 대비 과도한 상황에서 총량 관리는 금융위기 예방을 위한 불가피한 조치",
-                  "초저리 대출의 무제한 공급이 수도권 집값 폭등과 갭투자를 자극했던 부작용을 선제적으로 차단해야 함",
-                  "한국은행 기준금리 인하 기조와 맞물려 유동성이 부동산으로 재유입되는 것을 방지할 방파제 필수"
-                ]
+                title: "정부 및 금융당국 (거시 안정)",
+                text: "가계부채가 GDP의 90%를 초과하는 상황에서 금리 인하기 유동성 억제와 금융위기 예방을 위한 선제적 총량 관리는 불가피합니다."
               },
               left: {
-                label: "야당 및 실수요자 시각 (예측가능성·주거 안전망)",
-                args: [
-                  "사전 예고 없는 일방적 대출 축소로 잔금을 앞둔 서민·신혼부부가 제2금융권이나 사금융으로 내몰림",
-                  "투기 세력이 아닌 생애 최초 주택 구입자 대상 저리 정책금융까지 축소하는 것은 주거 사다리 박탈",
-                  "공급 대책 실패와 집값 불안의 책임을 금융 규제를 통한 서민 대출 조이기로 전가하고 있다는 비판"
-                ]
+                title: "야당 및 실수요자 (주거 사다리)",
+                text: "고가 주택 투기가 아닌 서민·신혼부부의 생애 첫 주택 정책대출까지 일방적으로 축소해 사금융으로 내모는 서민 옥죄기입니다."
               }
             },
-            body: {
-              lead: "수도권 집값 불안과 가계부채 급증을 억제하기 위한 금융당국의 주택담보대출 규제 및 디딤돌 대출 한도 조정을 두고 논란이 이어지고 있다. 거시경제의 뇌관으로 지목된 1,900조 원 규모 가계부채를 관리하기 위해 대출 조이기가 불가피하다는 금융당국의 입장과, 무주택 서민과 신혼부부의 주거 사다리를 일방적으로 걷어찼다는 비판이 정면으로 맞서고 있다.",
-              background: "올해 상반기 수도권 아파트값을 중심으로 가격 상승세가 가팔라지고 주택담보대출이 급증하자, 정부는 스트레스 DSR 2단계 시행과 은행권 가계대출 총량 관리를 강도 높게 주문했다. 이 과정에서 서민 대상 정책대출인 디딤돌 대출의 한도 축소 방안이 예고 없이 추진되면서 계약금을 이미 치른 입주 예정자들의 거센 반발이 일어났고, 국토교통부는 유예 기간을 두는 등 보완 조치에 나섰다.",
-              cons: "정부와 금융당국은 국가 경제 전체의 건전성을 위해 대출 억제가 불가피하다고 강조한다. GDP 대비 가계부채 비율이 여전히 주요국 최상위권인 상황에서 통화정책 완화(금리 인하) 국면과 겹칠 경우 자칫 부동산 시장으로 투기 자금이 재유입될 위험이 크다는 것이다. 특히 정책대출이 부동산 과열의 도화선 역할을 했다는 비판을 수용하여, 무분별한 빚내기 주택 구입 관행을 차단하고 시장 안정을 도모해야 한다는 현실론을 내세운다.",
-              prog: "반면 야당과 시민사회단체, 실수요자들은 정책의 일관성 결여와 서민 피해를 지적한다. 정부가 상반기에는 특례보금자리론 등 정책금융으로 집을 사라고 유도해놓고, 하반기 들어 돌연 대출 문을 닫아버려 실수요자들을 혼란에 빠뜨렸다는 것이다. 특히 다주택자 투기 수요와 달리 실거주 목적의 중저가 주택 마련을 위한 디딤돌 대출까지 일괄 축소하는 것은 취약계층의 주거 안정을 침해하며, 제2금융권 대출 증가 등 풍선효과만 낳을 수 있다고 우려한다.",
-              future: "금융당국은 실수요자 불편을 최소화하는 맞춤형 대출 가이드라인을 정비하는 한편, 상환 능력 범위 내에서만 돈을 빌리는 관행을 정착시키겠다는 방침이다. 향후 금리 인하 속도와 수도권 공급 실적, 그리고 전세시장 자금 흐름이 대출 규제 기조의 지속 여부를 가를 중대 변수가 될 것으로 전망된다."
-            }
+            bodyHtml: `
+              <p>수도권 아파트값 불안과 가계부채 급증세를 억제하기 위한 금융당국의 주택담보대출 규제 및 디딤돌 대출 한도 조정을 둘러싸고 정책 후폭풍이 거세다. 거시경제의 뇌관으로 지목된 1,900조 원 규모의 가계부채를 억제하기 위해 대출 문턱을 높이는 것이 불가피하다는 금융당국의 입장과, 무주택 서민과 신혼부부의 주거 사다리를 일방적으로 걷어찼다는 비판이 정면으로 충돌하고 있다.</p>
+              
+              <p>올해 상반기 수도권 아파트 매매가가 가파르게 오르고 가계대출이 급증하자, 금융당국은 스트레스 DSR(총부채원리금상환비율) 2단계 시행과 함께 은행권에 가계대출 총량 관리를 강하게 주문했다. 이 과정에서 서민 대상 대표적 저리 정책금융인 디딤돌 대출의 '방공제(소액임차보증금 차감)' 의무화와 한도 축소가 충분한 예고 없이 추진되면서, 입주 잔금을 앞둔 수많은 서민 계약자들이 날벼락을 맞았다. 반발이 걷잡을 수 없이 확산되자 국토교통부는 유예 기간을 두는 등 수습에 나섰으나 정책 신뢰도에는 이미 큰 상처가 났다.</p>
+              
+              <p>정부와 금융당국은 국가 경제 전체의 건전성을 위해 대출 조이기가 불가피했다고 설명한다. 한국은행의 기준금리 인하 기조와 맞물려 유동성이 부동산 시장으로 재유입될 경우 집값 폭등과 갭투자가 재연될 위험이 크다는 것이다. 금융당국 관계자는 "가계부채 비율이 위험 수위에 도달한 만큼, 무분별하게 빚을 내어 집을 사는 관행을 차단하고 갚을 수 있는 범위 내에서만 빌리는 구조를 정착시켜야 한다"고 강조했다.</p>
+              
+              <p>반면 야당과 시민사회, 실수요자들은 정책의 일관성 결여와 취약계층 피해를 집중적으로 성토하고 있다. 정부가 상반기에는 특례보금자리론 등 정책금융을 쏟아내며 주택 구입을 유도해 놓고, 하반기 들어 돌연 대출 문을 걸어 잠그는 것은 전형적인 탁상행정이라는 지적이다. 특히 투기 세력이 아닌 실거주 목적의 중저가 주택 마련을 위한 정책대출까지 일괄 축소하는 것은 서민들의 주거 안정을 침해하고 제2금융권 고금리 대출로 내모는 풍선효과만 낳는다는 비판이 거세다.</p>
+              
+              <p>전문가들은 가계부채 관리라는 거시적 목표와 서민 주거 안정이라는 미시적 복지가 조화를 이루기 위해선 정밀한 맞춤형 대출 가이드라인이 필요하다고 입을 모은다. 수도권 공급 대책의 실효성과 향후 금리 인하 속도가 대출 규제 기조의 지속 여부를 가를 중대 변수가 될 것으로 전망된다.</p>
+            `
           },
 
-          // 2. 해외 1개 (미국·유럽)
+          // 2. 해외
           {
-            pillar: "해외 1개",
-            pillarIcon: "🌐",
-            category: "미국·유럽 글로벌 쟁점",
-            origin: "외신 심층 (FT, The Economist, Reuters, WSJ)",
-            headline: "美 '방위비 5% 및 보편관세' 압박 vs 유럽 '총이냐 복지냐' 딜레마… 대서양 동맹 재편과 재정 긴축 갈등",
-            summary: "미국의 '나토 방위비 GDP 5% 증액 요구'와 보편적 관세 공세 속에서, 유럽 각국이 국방비 증강을 위해 복지·연금 예산 삭감과 증세를 단행해야 하는 전례 없는 재정적·정치적 딜레마에 직면하고 있습니다.",
-            facts: [
-              "미국 정치권(트럼프 진영 등)은 유럽 회원국들에게 기존 나토 가이드라인(GDP 대비 2%)을 넘어 최대 5%까지 방위비를 대폭 증액할 것을 공식 압박함.",
-              "미국은 유럽연합(EU)을 상대로 10~20% 수준의 보편적 기본관세 부과 가능성을 시사하며 안보 무임승차 해소와 무역 불균형 조정을 연계함.",
-              "폴란드 등 러시아 접경 동유럽 국가는 국방비를 GDP 4% 이상으로 확대했으나, 영국·프랑스·독일 등 서유럽 국가들은 만성적 재정 적자와 생활비 위기로 진통을 겪음.",
-              "유럽 주요국에서 군비 증액을 위한 복지 예산 삭감과 연금 개혁 시도가 노동계의 대규모 총파업과 극우·극좌 포퓰리즘 정당의 지지율 상승으로 이어짐."
+            category: "해외",
+            badgeColor: "bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+            origin: "외신 심층 (FT, The Economist, WSJ)",
+            headline: "美 '방위비 5%·보편관세' 청구서 vs 유럽 '총이냐 복지냐' 딜레마… 대서양 동맹 흔드는 재정 긴축",
+            subheadline: "미국의 안보 무임승차 비판과 관세 압박에 유럽 각국이 복지 삭감과 국방비 증강 사이에서 내홍",
+            byline: "【워싱턴·베를린=국제부 종합】",
+            summaryBullets: [
+              "미국(트럼프 등)이 유럽 회원국에 나토 가이드라인(2%)을 넘어 GDP 대비 최대 5%까지 방위비 증액을 요구함.",
+              "미국은 유럽연합(EU)을 상대로 10~20% 보편관세 위협을 병행하며 안보 비용과 무역 불균형 조정을 연계함.",
+              "유럽은 국방비 증강을 위해 의료·연금 등 복지 예산 삭감과 증세를 단행하며 총파업과 극우 정당 득세에 직면함."
             ],
             perspectives: {
               right: {
-                label: "미국 및 서방 안보 현실주의 시각 (안보 자강·공정 분담)",
-                args: [
-                  "미국 납세자의 세금으로 유럽 안보를 무한정 대납하는 시대는 끝났으며, 유럽 스스로 자강 능력을 갖춰야 함",
-                  "러시아의 우크라이나 침공으로 안보 위협이 현실화된 만큼 억제력 유지를 위한 실질적 국방비 투자는 불가피",
-                  "유럽의 막대한 대미 무역 흑자를 감안할 때 안보 비용 분담과 통상 불균형 해소는 합리적 요구"
-                ]
+                title: "미국 및 서방 안보 진영 (안보 자강)",
+                text: "미국 납세자가 유럽 안보를 무한정 대납하는 시대는 끝났으며, 러시아 억제를 위해 유럽 스스로 자강 능력을 갖춰야 합니다."
               },
               left: {
-                label: "유럽 현지 및 사회정책학계 시각 (복지 훼손·동맹 균열)",
-                args: [
-                  "수십 년간 유지된 유럽의 공공의료·연금 복지 모델을 일거에 해체하고 군비로 전환하는 것은 사회적 자해 행위",
-                  "미국이 관세를 지렛대로 동맹국을 위협하는 행태는 대서양 동맹의 신뢰를 파괴하고 유럽 내 반미 감정 조장",
-                  "생활고에 지친 서민들의 불만이 극우 정당의 득세로 이어져 유럽의 정치적 통합과 민주주의 자체가 흔들릴 위험"
-                ]
+                title: "유럽 현지 및 사회학계 (복지 모델 붕괴)",
+                text: "수십 년간 유지된 공공의료·연금 복지를 무리하게 군비로 돌리는 것은 서민 생활고를 가중시키고 동맹을 깨뜨리는 자해입니다."
               }
             },
-            body: {
-              lead: "미국의 강력한 방위비 분담 증액 요구와 무역 관세 압박이 맞물리면서 유럽 대륙이 '총이냐 버터(복지)냐'라는 역사적 기로에 놓였다. 우크라이나 전쟁 이후 안보 자강을 위해 국방비를 획기적으로 늘려야 한다는 현실적 필요성과, 의료·연금 등 복지 예산 삭감에 반발하는 유럽 시민사회의 저항이 대서양 동맹을 뒤흔들고 있다.",
-              background: "미국 차기 행정부와 의회 일각에서는 나토 회원국들이 GDP의 최소 3~5%까지 방위비를 올려야 한다며, 이에 응하지 않을 경우 상호관세 부과 및 안보 공약 재검토를 경고했다. 이에 따라 유럽 각국은 나토 정상회의 등을 통해 국방비 확대를 결의했으나, 경기 침체와 고금리로 재정이 고갈된 서유럽 국가들은 증세와 복지 지출 축소라는 극단적 선택에 내몰렸다.",
-              cons: "미국 측과 안보 전문가들은 냉전 종식 이후 유럽이 누려온 '평화의 배당금' 시대가 끝났다고 강조한다. 러시아의 팽창주의와 군사적 위협이 실존하는 상황에서 미국에만 안보를 의존한 채 복지 혜택만 누리는 것은 무책임하다는 지적이다. 또한 유럽의 자체 방위 산업 역량을 강화하고 미국산 무기 도입을 확대하는 것이 결국 자유진영 전체의 억제력을 유지하는 유일한 방안이라고 주장한다.",
-              prog: "반면 영국, 프랑스, 독일 등 유럽 주요 언론과 지식인 사회는 과도한 군비 증강이 유럽 고유의 사회적 시장경제 모델을 파괴하고 있다고 우려한다. 생활비 위기와 고물가로 신음하는 서민들의 연금과 공공의료 예산을 깎아 무기 구매에 쏟아붓는 것은 민생을 도탄에 빠뜨린다는 것이다. 특히 이러한 재정 긴축이 극우 포퓰리즘 정당의 지지율 급등으로 이어져 유럽 연합 내부의 분열과 민주적 가치 훼손을 초래하고 있다는 비판이 거세다.",
-              future: "향후 미국의 신행정부 출범과 함께 방위비 협상과 보편관세 발효 여부가 유럽 경제의 최대 뇌관이 될 전망이다. 유럽이 안보 자주성과 복지 국가 체제 사이에서 지속 가능한 재정 균형점을 찾아낼 수 있을지가 국제 안보 지형의 중대 분수령이 될 것으로 보인다."
-            }
+            bodyHtml: `
+              <p>미국의 강력한 방위비 분담 증액 요구와 무역 관세 압박이 맞물리면서 유럽 대륙이 '총이냐 버터(복지)냐'라는 역사적 기로에 내몰리고 있다. 러시아의 군사적 위협에 맞서 국방비를 획기적으로 늘려야 한다는 안보적 절박함과, 수십 년간 다져온 공공의료와 연금 복지 삭감에 반발하는 유럽 시민사회의 저항이 대서양 동맹의 지형을 뒤흔들고 있다.</p>
+              
+              <p>미국 차기 행정부와 의회 일각에서는 유럽 나토 회원국들이 기존 가이드라인인 GDP 대비 2%를 넘어 최소 3~5%까지 방위비를 올려야 한다고 공식 압박하고 있다. 여기에 유럽연합(EU)산 수입품에 대해 10~20%의 보편적 기본관세를 부과하겠다는 경고까지 겹쳤다. 안보 무임승차를 용납하지 않겠다는 미국의 엄포에 동유럽 접경국들은 국방비를 GDP 4% 이상으로 확대했으나, 고물가와 재정 적자에 시달리는 영국, 프랑스, 독일 등 서유럽 국가들은 증세와 복지 지출 축소라는 극단적 선택에 직면했다.</p>
+              
+              <p>미국 측 안보 전문가들은 냉전 종식 이후 유럽이 누려온 '평화의 배당금' 시대가 종식되었다고 단언한다. 러시아의 우크라이나 침공으로 안보 위협이 코앞에 닥친 상황에서, 막대한 대미 무역 흑자를 내면서도 안보는 미국에만 의존한 채 자국민 복지만 챙기는 것은 지속 가능하지 않다는 지적이다. 유럽이 자체 방위 산업 역량을 키우고 미국산 첨단 무기 도입을 확대해야만 자유진영 전체의 억제력을 지킬 수 있다는 논리다.</p>
+              
+              <p>반면 영국 파이낸셜타임스(FT)와 유럽 지식인 사회는 과도한 군비 증강이 유럽 고유의 사회적 시장경제 모델을 파괴하고 있다고 경고한다. 생활비 위기로 고통받는 서민들의 연금 수령 연령을 늦추고 의료 복지 예산을 깎아 무기 구매에 쏟아붓는 것은 민생을 도탄에 빠뜨린다는 것이다. 특히 이러한 재정 긴축이 프랑스 국민연합(RN), 독일을위한대안(AfD) 등 극우 포퓰리즘 정당의 지지율 급등으로 이어져 유럽 연합의 정치적 결속과 민주주의 자체가 흔들리고 있다는 우려가 깊다.</p>
+              
+              <p>전문가들은 유럽이 안보 자주성과 복지 국가 체제 사이에서 실질적인 재정 균형점을 찾아낼 수 있을지가 향후 서방 동맹의 결속과 글로벌 통상 질서의 최대 분수령이 될 것으로 내다보고 있다.</p>
+            `
           },
 
-          // 3. 북한 1개 (외신 심층)
+          // 3. 북한
           {
-            pillar: "북한 1개",
-            pillarIcon: "🕊️",
-            category: "북한·안보 (외신 심층 분석)",
-            origin: "외신 심층 (Reuters, BBC, AP, CSIS, 38 North)",
-            headline: "외신이 본 北 러시아 파병과 경의선 폭파… '대남 단절을 통한 체제 결속' vs '한미일 압박에 맞선 북러 군사동맹 올인'",
-            summary: "북한의 러시아 파병(우크라이나전 참전)과 헌법상 '적대적 두 국가론' 명시, 경의선·동해선 연결도로 폭파에 대해 해외 주요 정보기관과 외신들은 단순 도발을 넘어선 북한의 생존 전략이자 다극화 외교 올인으로 심층 분석하고 있습니다.",
-            facts: [
-              "북한은 러시아와 자동 군사개입 조항이 포함된 '포괄적 전략적 동반자 관계 조약'을 체결·비준하고, 우크라이나 전선에 특수부대 등 1만여 명 이상의 병력을 파병함.",
-              "북한은 2024년 10월 남북 교류협력의 상징이었던 경의선·동해선 연결도로 및 철도 일부 구간을 폭파하고 국경 요새화 공사를 진행함.",
-              "김정은 위원장은 최고인민회의를 통해 헌법을 개정하고 남북 관계를 '동족'이 아닌 '전쟁 중에 있는 적대적 두 국가'로 공식 규정함.",
-              "미국, 유럽, 우크라이나 정부 및 서방 정보당국(CSIS, RUSI 등)은 북한이 파병 대가로 러시아로부터 군사정찰위성, 핵잠수함, 대공미사일 기술 및 원유·식량 공급을 보장받았다고 평가함."
+            category: "북한",
+            badgeColor: "bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border-rose-200 dark:border-rose-800",
+            origin: "외신 심층 (Reuters, BBC, CSIS)",
+            headline: "외신이 본 北 러시아 파병과 육로 폭파의 이면… '대남 단절을 통한 체제 결속'과 '북러 군사동맹 올인'",
+            subheadline: "국내 정쟁을 넘어 로이터·CSIS 등 외신이 짚어낸 북한의 러시아 파병과 적대적 두 국가론의 지정학적 셈법",
+            byline: "【베이징·서울=외교안보팀 종합】",
+            summaryBullets: [
+              "북한이 러시아와 군사조약 비준 후 특수부대 등 1만여 명의 병력을 우크라이나 전선에 파병함.",
+              "경의선·동해선 연결도로를 전격 폭파하고 헌법상 대한민국을 '적대적 두 국가'로 명시함.",
+              "외신들은 대남 소통 창구를 차단함으로써 '민족' 개입을 막고 러시아 올인으로 첨단 군사기술을 챙기려는 전략으로 분석함."
             ],
             perspectives: {
               right: {
-                label: "서방 안보당국 및 국제사회 시각 (유엔 결의 위반·안보 위협)",
-                args: [
-                  "주권국가를 침략한 러시아에 병력을 제공한 것은 유엔 헌장과 안보리 결의를 정면 위반한 위험한 용병 행위",
-                  "북한군이 현대전(드론전·전자전) 실전 경험을 축적하고 러시아의 첨단 미사일 기술을 이전받을 경우 한반도 안보에 치명적 위협",
-                  "남북 육로 폭파와 통일 노선 폐기는 경제난과 내부 동요를 외부의 적으로 돌리기 위한 궁여지책의 체제 단속"
-                ]
+                title: "서방 안보당국 (유엔 결의 위반·치명적 위협)",
+                args: "침략국에 병력을 제공한 불법 용병 행위이며, 실전 경험과 첨단 미사일 기술을 전수받은 북한군의 복귀는 치명적 안보 위협입니다."
               },
               left: {
-                label: "북·러 연대 및 지정학 분석가 시각 (세력 균형·생존 전략)",
-                args: [
-                  "한미일의 전례 없는 대규모 연합훈련과 전략핵잠수함 전개, 대북 전단 및 무인기 침투 등 체제 위협에 맞선 생존적 대응",
-                  "남한을 '적대 국가'로 못 박음으로써 대화와 민족 프레임의 개입을 원천 차단하고 러시아와의 전략적 연합에 전력 집중",
-                  "미국 중심의 일극 체제가 흔들리는 틈을 타 러시아·중국과 손잡고 다극화 국제 질서에서 독자적 생존 공간 확보"
-                ]
+                title: "지정학 분석가 (세력 균형·생존 전략)",
+                args: "한미 확장억제 강화에 맞서 재래식 열세를 만회하고, 대남 개입 여지를 차단한 채 러시아와 손잡고 다극화 질서에서 생존하려는 포석입니다."
               }
             },
-            body: {
-              lead: "북한이 우크라이나 전쟁을 치르는 러시아에 대규모 정예 병력을 파병하는 한편, 남북을 잇는 경의선·동해선 도로를 전격 폭파하며 '대남 단절'을 공식화했다. 국내 정치적 공방을 넘어 해외 주요 언론과 국제 안보 싱크탱크들은 북한의 이번 행보가 냉전 이후 한반도 안보 환경을 근본적으로 바꾸어 놓은 중대 변곡점이라고 일제히 진단하고 있다.",
-              background: "북한은 김정은 위원장이 선언한 '적대적 두 국가론'에 따라 헌법을 개정하고 통일 및 동족 개념을 공식 폐기했다. 동시에 블라디미르 푸틴 러시아 대통령과의 군사조약을 비준하며 특수부대 병력을 러시아 쿠르스크 등 격전지로 파견했다. 이는 과거 북한이 취해온 '한반도 내부 긴장 고조' 전략에서 벗어나 유라시아 전체의 전쟁 판도에 직접 발을 들이는 파격적인 외교·군사적 선회다.",
-              cons: "미국, 나토(NATO), 한국 정부 및 서방 전문가들은 북한의 러시아 파병을 체제 유지를 위한 위험천만한 도박으로 규정한다. 북한 정권이 청년 군인들을 총알받이로 내몰며 그 대가로 핵 추진 잠수함, ICBM 대기권 재진입, 정찰위성 발사체 기술 등 첨단 무기 기술을 챙기려 한다는 비판이다. 또한 드론과 야간전투 등 현대전 실전 능력을 습득한 북한군이 한반도로 복귀할 경우 대남 군사적 위협이 질적으로 고도화될 것이라고 경고한다.",
-              prog: "반면 로이터, BBC 등 외신 안보 분석가들과 일부 지정학 연구자들은 북한의 이러한 극단적 행보 이면에 깔린 전략적 계산에 주목한다. 윤석열 정부 출범 이후 강화된 한미 확장억제(워싱턴 선언), 미 전략자산의 한반도 상시 전개, 한미일 3각 군사협력에 직면한 북한이 재래식 전력 열세를 만회하기 위해 '러시아 올인'을 선택했다는 분석이다. 남북 육로를 파괴하여 대남 개입 여지를 차단한 것 역시 후방의 안전을 확보한 상태에서 대외 군사동맹에 전념하겠다는 신호라는 해석이다.",
-              future: "북한군의 전선 투입 본격화와 서방의 대러·대북 추가 제재, 그리고 미국의 대선 결과에 따른 우크라이나 종전 협상 전개 여부가 한반도 안보의 향방을 가를 최대 변수다. 남북 관계가 '평화적 통일 대상'에서 '핵보유국 간의 교전 관계'로 재정의됨에 따라, 한반도의 우발적 군사 충돌을 방지할 새로운 위기관리 시스템 마련이 시급하다는 지적이 나온다."
-            }
-          }
-        ]
-      },
-
-      // Edition 2: Alternate Rolling Edition (also strictly 국내 1 + 해외 1 + 북한 1)
-      {
-        id: "edition_2",
-        name: "오늘의 글로벌·한반도 에디션 2",
-        articles: [
-          // 1. 국내 1개
-          {
-            pillar: "국내 1개",
-            pillarIcon: "🇰🇷",
-            category: "국내 정치 / 경제",
-            origin: "국내 입법·자본시장 심층",
-            headline: "금투세 폐지 수순과 상법 개정안(주주 충실의무 도입) 공방… '증시 부양' vs '소액주주 보호 및 경영권 침해'",
-            summary: "여야가 금투세 폐지에 합의한 이후 후속 입법으로 상법상 이사의 충실의무를 총주주로 확대하는 개정안을 두고, 소액주주 권익 보호와 기업 경영권 위축이라는 상반된 시각이 맞서고 있습니다.",
-            facts: [
-              "여야 지도부는 1,400만 주식 투자자 여론과 시장 변동성을 감안하여 금투세 폐지 또는 유예에 합의함.",
-              "야당은 금투세 폐지의 대안으로 상법 제382조의3을 개정하여 이사의 충실의무 대상을 '회사'에서 '회사 및 총주주'로 넓히는 법안을 당론 추진함.",
-              "경제단체 및 재계는 이사에 대한 배임죄 고소 및 손해배상 소송 남발로 정상적 경영 판단이 위축될 것이라며 강력 반대함.",
-              "정부·여당은 상법 개정 대신 자본시장법 '핀셋 개정'을 통해 특정 합병·분할 사안만 규제하는 대안을 제시함."
-            ],
-            perspectives: {
-              right: {
-                label: "재계 및 정부·여당 시각 (경영 안정·신속 투자)",
-                args: [
-                  "모든 주주의 이해관계가 다른 상황에서 일괄 충실의무를 지우면 과감한 신사업 투자와 M&A 마비",
-                  "해외 투기자본의 경영 간섭과 적대적 M&A 위협에 취약해져 국가 기간산업 경쟁력 약화",
-                  "자본시장법 개정을 통한 개별 사안별 핀셋 규제가 시장 혼란을 줄이는 합리적 해법"
-                ]
-              },
-              left: {
-                label: "야당 및 소액주주 연대 시각 (코리아 디스카운트 해소)",
-                args: [
-                  "대주주 일가만을 위한 쪼개기 상장, 불공정 합병 비율로 소액주주가 피해를 봐도 이사에게 책임 부과 불가",
-                  "상법상 주주 충실의무 도입이야말로 코리아 디스카운트를 극복하고 선진 자본시장으로 도약하는 핵심 열쇠",
-                  "정당한 경영판단원칙을 적용하면 소송 남발을 방지할 수 있으므로 재계의 우려는 과장된 핑계"
-                ]
-              }
-            },
-            body: {
-              lead: "금투세 폐지가 확실시되면서 국회 자본시장 선진화 논의의 축이 '상법 개정안'으로 급격히 이동하고 있다. 대주주 위주의 의사결정으로부터 1,400만 일반 주주를 지키기 위해 이사의 주주 충실의무를 신설해야 한다는 주장과, 소송 남발로 기업 경영이 전면 마비될 것이라는 경영계의 반발이 충돌하고 있다.",
-              background: "국내 대기업의 지배구조 개편 과정에서 소액주주 권익 침해 논란이 반복되자, 야당은 주주 가치 제고를 위한 법적 안전망으로 상법 개정을 전면에 내걸었다.",
-              cons: "재계는 미국 델라웨어주 등 해외에서도 주주에 대한 충실의무는 판례로 축적될 뿐 법전에 일괄 명시하지 않는다고 지적한다. 이사에게 형사처벌 위험을 가중시키면 과감한 미래 투자가 실종될 수밖에 없다는 우려다.",
-              prog: "반면 소액주주 운동 진영은 일반 주주의 비례적 이익을 법적으로 보장하지 않는 한 국내 증시의 신뢰 회복은 불가능하다고 강조한다. 기업 지배구조의 불투명성을 걷어내야만 외국인 자금이 안심하고 유입될 수 있다는 설명이다.",
-              future: "국회 정무위와 법사위 심사 과정에서 경영판단원칙의 성문화 수준과 자본시장법 개정과의 절충 가능성을 둘러싼 치열한 입법 협상이 예고된다."
-            }
+            bodyHtml: `
+              <p>북한이 우크라이나 전쟁을 치르는 러시아에 대규모 정예 병력을 파병하고 남북을 잇는 경의선·동해선 연결도로를 전격 폭파하면서 한반도 안보 환경이 냉전 이후 최대의 격변을 맞고 있다. 국내 정치적 공방을 넘어 로이터(Reuters), BBC, 미국 전략국제문제연구소(CSIS) 등 해외 주요 외신과 안보 싱크탱크들은 북한의 이번 행보를 단순 도발이 아닌 정권의 명운을 건 외교·군사적 승부수로 규정하며 심층 분석을 쏟아내고 있다.</p>
+              
+              <p>북한은 블라디미르 푸틴 러시아 대통령과 체결한 '포괄적 전략적 동반자 관계 조약'을 비준하고 특수부대 병력을 러시아 쿠르스크 등 격전지로 파견했다. 동시에 최고인민회의를 통해 헌법을 개정하고 대한민국을 '철저한 적대국가'로 공식 명시하며 통일과 동족 개념을 전면 폐기했다. 교류와 협력의 상징이었던 남북 연결 철도와 도로를 폭약으로 파괴한 것은 이러한 대남 단절 의지를 시각적으로 과시한 상징적 조치였다.</p>
+              
+              <p>미국, 나토(NATO), 한국 정부는 북한의 파병을 국제법과 유엔 안보리 결의를 정면 위반한 위험한 용병 행위로 규탄하고 있다. 북한 정권이 청년 군인들을 사지로 내몰며 그 대가로 ICBM 대기권 재진입체, 군사정찰위성 발사체 기술, 핵추진 잠수함 부품 등 첨단 군사기술과 원유·식량을 챙기려 한다는 비판이다. 서방 정보당국은 현대 드론전과 야간전투 실전 능력을 습득한 북한군이 한반도로 복귀할 경우 대남 군사 위협이 질적으로 완전히 달라질 것이라고 경고한다.</p>
+              
+              <p>반면 외신 안보 분석가들과 지정학 연구자들은 북한의 극단적 선회 이면에 깔린 냉혹한 생존 셈법에 주목한다. 윤석열 정부 출범 이후 강화된 한미 확장억제(워싱턴 선언), 미 전략핵잠수함의 한반도 전개, 한미일 3각 군사협력에 직면한 북한이 재래식 전력 열세를 만회하기 위해 '러시아 올인'을 택했다는 분석이다. 특히 남북 육로를 파괴하여 대화의 여지를 스스로 끊어버린 것은, 남한과의 모든 관계를 차단함으로써 후방의 안전을 확보한 상태에서 대외 군사동맹에 전력을 쏟겠다는 의지의 표현이라는 해석이다.</p>
+              
+              <p>남북 관계가 '평화적 통일 대상'에서 '핵보유국 간의 교전 관계'로 완전히 재정의됨에 따라, 한반도의 우발적 군사 충돌을 방지할 새로운 위기관리 시스템 마련이 시급하다는 지적이 나온다.</p>
+            `
           },
 
-          // 2. 해외 1개 (EU·중국)
+          // 4. 이색 해외 (방글라데시 7월 혁명)
           {
-            pillar: "해외 1개",
-            pillarIcon: "🌐",
-            category: "유럽·글로벌 무역 쟁점",
-            origin: "외신 심층 (Bloomberg, Reuters, Politico EU)",
-            headline: "EU의 중국산 전기차 최대 45.3% 고율 관세 확정… '역내 산업 보호' vs '독일 자동차 보복 및 무역전쟁 공포'",
-            summary: "유럽연합(EU)이 중국산 전기차에 최대 45.3%의 상계관세를 부과하기로 최종 결정한 가운데, 프랑스를 중심으로 한 역내 제조업 보호론과 중국 시장 비중이 큰 독일 자동차 업계의 보복 우려가 극명하게 갈리고 있습니다.",
-            facts: [
-              "EU 집행위원회는 중국 정부의 불법 보조금을 이유로 기존 10% 관세에 더해 최대 35.3%의 추가 관세를 확정함.",
-              "프랑스와 이탈리아 등은 찬성표를 던졌으나, 폭스바겐·BMW 등 중국 수출 비중이 큰 독일은 강력히 반대 표결함.",
-              "중국 상무부는 EU산 돼지고기, 유제품, 브랜디(코냑) 등에 대한 반덤핑 조사로 맞불을 놓으며 보복 조치를 경고함.",
-              "글로벌 친환경 전환 목표와 저가 전기차 공급 둔화, 완성차 공급망 교란 우려가 동시에 부상함."
+            category: "이색 해외",
+            badgeColor: "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+            origin: "외신 심층 (Al Jazeera, AP, Reuters, NYT)",
+            headline: "15년 철권통치 무너뜨린 방글라데시 'Z세대 혁명'… 유누스 임시정부의 국가 재건과 과도기 격랑",
+            subheadline: "국내 언론이 주목하지 못한 서남아시아의 대격변: 대학생 민중 봉기, 총리 헬기 도피, 그리고 노벨평화상 수상자의 등판",
+            byline: "【다카(방글라데시)=특파원 종합】",
+            summaryBullets: [
+              "2024년 8월, 15년간 방글라데시를 통치한 하시나 총리가 학생 주도의 거센 민중 봉기로 사임 후 인도로 도피함.",
+              "독립유공자 자녀 공직 할당제 반대에서 촉발된 시위가 전국적 반정부 혁명으로 번져 1,000명 이상이 희생됨.",
+              "노벨평화상 수상자인 무함마드 유누스(84)가 임시정부 수반으로 취임해 국가 대개혁을 이끌고 있으나 치안과 경제 위기 직면."
             ],
             perspectives: {
               right: {
-                label: "EU 집행위 및 프랑스 시각 (공정 경쟁·역내 산업 방어)",
-                args: [
-                  "중국 정부의 막대한 국가 보조금으로 왜곡된 가격 경쟁은 유럽 자동차 산업의 존립을 위협함",
-                  "사전 방어막을 치지 않으면 과거 태양광 패널 산업이 중국의 저가 공세에 전멸했던 비극이 재현될 것",
-                  "공정한 글로벌 룰에 기반한 무역 질서를 세우기 위해 단호한 제재 관세는 불가피"
-                ]
+                title: "학생 시민사회 및 개혁 진영 (제2의 독립)",
+                text: "15년간 이어진 부패 독재와 사법 장악, 정경유착을 시민의 피로 무너뜨린 역사적 승리이며 민주주의의 진정한 출발입니다."
               },
               left: {
-                label: "독일 자동차 업계 및 친환경 진영 시각 (무역전쟁·기후 목표 후퇴)",
-                args: [
-                  "중국의 보복 관세로 인해 독일 완성차 기업들의 중국 내 매출과 투자가 막대한 타격을 입음",
-                  "고율 관세로 유럽 내 전기차 가격이 급등하여 2035년 내연기관차 퇴출 등 탄소중립 기후 목표 달성 차질",
-                  "보호무역 장벽 쌓기 대신 기술 혁신과 공급망 협력을 통한 경쟁력 강화가 본질적 해법"
-                ]
+                title: "구 정권 지지층 및 외교 신중론 (치안 공백·사회 분열)",
+                text: "경찰관 보복 피습과 힌두교 소수자 공격 등 치안 공백이 심각하며, 학생 지도부의 과도한 정치 개입과 경제 파탄이 우려됩니다."
               }
             },
-            body: {
-              lead: "유럽연합(EU)이 중국산 전기차에 대한 최고 45.3%의 고율 상계관세 부과를 강행하면서 글로벌 통상 전쟁의 전운이 고조되고 있다. 역내 자동차 제조업을 지키기 위한 고육지책이라는 명분과, 최대 시장인 중국의 보복으로 유럽 경제 전체가 타격을 입을 것이라는 경고가 격돌하고 있다.",
-              background: "중국산 전기차의 유럽 시장 점유율이 급증하자, EU는 불법 보조금 조사를 거쳐 관세 부과를 의결했다. 그러나 회원국 간 표결에서 프랑스와 독일이 정반대 표를 던지며 유럽 내부의 균열도 노출되었다.",
-              cons: "관세를 주도한 측은 유럽 완성차 제조사들이 수백만 개의 일자리를 책임지고 있는 상황에서 저가 덤핑을 방치할 수 없다고 강조한다. 산업 생태계가 무너지면 장기적으로 유럽의 전략적 자율성이 상실된다는 논리다.",
-              prog: "반면 독일 업계는 무역 장벽이 유럽 자동차의 체질 개선에 도움이 되지 않으며, 오히려 중국 정부의 농축산물·고급 승용차 보복 조치로 부메랑을 맞을 것이라고 호소한다. 소비자들의 친환경 전기차 구매 문턱만 높여 탄소 감축에 역행한다는 비판도 제기된다.",
-              future: "EU와 중국 간의 최저 판매 가격 합의 등 막판 협상 여부와 함께, 글로벌 완성차 업체들의 현지 공장 설립(우회 투자) 전략이 무역 갈등의 완충재 역할을 할 수 있을지 주목된다."
-            }
-          },
-
-          // 3. 북한 1개 (외신 심층)
-          {
-            pillar: "북한 1개",
-            pillarIcon: "🕊️",
-            category: "북한·안보 (외신 심층 분석)",
-            origin: "외신 심층 (NYT, Reuters, CSIS, 38 North)",
-            headline: "北 신형 ICBM '화성-19형' 발사와 헌법상 적대국 명시… '美 본토 타격 완성' vs '대미 협상력 극대화 노림수'",
-            summary: "북한이 역대 최장 비행시간과 정점고도를 기록한 신형 고체연료 ICBM '화성-19형'을 시험발사하고 헌법에 대한민국을 적대국가로 못 박은 것에 대해, 외신들은 대미 핵 억제력 완성 과시와 정권 교체기 협상력 극대화 행보로 분석하고 있습니다.",
-            facts: [
-              "북한은 고체연료 추진 기반의 다탄두 탑재형 신형 ICBM 화성-19형을 고각 발사하여 정점고도 7,687km, 비행거리 1,001km를 기록함.",
-              "해외 미사일 전문가들은 정상 각도 발사 시 사거리가 15,000km에 달해 미국 본토 전역을 타격할 수 있는 능력에 근접했다고 평가함.",
-              "북한 최고인민회의는 헌법에 대한민국을 '철저한 적대국가'로 명시하고 통일 및 민족 연대 조항을 삭제한 사실을 공개함.",
-              "유엔 안보리와 서방 주요국은 탄도미사일 기술을 이용한 일체의 발사를 금지한 안보리 결의 위반으로 규탄 성명을 발표함."
-            ],
-            perspectives: {
-              right: {
-                label: "서방 정보당국 및 군사 전문가 시각 (레드라인 위협·제재 강화)",
-                args: [
-                  "고체연료 다탄두 ICBM은 사전 탐지가 극히 어려워 미국의 미사일 방어망(MD)을 무력화할 수 있는 실존적 안보 위협",
-                  "러시아의 파병 대가로 제공된 재진입체 및 로켓 모터 기술이 결합되었을 가능성이 농후하여 국제 비확산 체제 붕괴 우려",
-                  "대화 제의를 일축하고 핵능력을 고도화하는 만큼 대북 금융제재망 재정비와 확장억제 실행력 강화가 유일한 대안"
-                ]
-              },
-              left: {
-                label: "지정학 및 외교 협상 분석가 시각 (체제 방어·협상 지렛대)",
-                args: [
-                  "미국의 대선 정국과 지도부 교체기에 맞춰 '핵보유국 지위'를 기정사실화하고 향후 군축 협상에서 우위를 점하려는 포석",
-                  "한미 연합훈련과 전략폭격기 전개에 맞서 '되돌릴 수 없는 핵 억제력'을 갖춤으로써 미국의 대북 공격 가능성을 차단하려는 계산",
-                  "남북 관계를 외국 간의 관계로 재정의함으로써 향후 북미 직접 담판을 추진할 명분을 사전 축적하는 전략"
-                ]
-              }
-            },
-            body: {
-              lead: "북한이 신형 대륙간탄도미사일(ICBM) '화성-19형' 발사에 성공했다고 발표하며 핵 무력의 질적 도약을 과시했다. 대한민국을 헌법상 명시적 적으로 규정한 데 이어 미국 본토 타격 능력을 입증하려는 북한의 군사적 행보를 두고, 서방 안보 진영의 위기감과 외교적 협상 지렛대 확보라는 분석이 교차하고 있다.",
-              background: "북한은 이동식 발사대(TEL)에서 화성-19형을 쏘아 올려 역대 최고 고도와 최장 비행시간을 갱신했다. 이는 과거 액체연료 미사일과 달리 즉시 발사가 가능하여 미사일 방어 체계의 요격을 더욱 어렵게 만든다.",
-              cons: "한미 안보 당국과 국제사회는 이번 시험발사가 한반도를 넘어 전 세계 안보 질서를 위협하는 심각한 도발이라고 규탄한다. 특히 러시아로부터 핵심 군사기술이 이전되었을 개연성이 높아짐에 따라, 북한의 미사일 개발 속도가 통제 불능 수준에 도달했다는 경고음이 커지고 있다.",
-              prog: "반면 외신 군사 분석가들은 북한의 이번 도발 타이밍에 주목한다. 미국 대선 직전 무력시위를 통해 차기 미 행정부의 우선순위에 북핵 문제를 올려놓고, '비핵화'가 아닌 '핵동결 및 제재 완화'를 목표로 하는 군축 협상판을 짜려는 고도의 정치적 노림수라는 분석이다.",
-              future: "유엔 안보리 추가 제재가 러시아와 중국의 거부권 행사로 무력화된 가운데, 한미일의 독자 제재 공조와 차기 미 행정부의 대북 정책 기조가 향후 한반도 정세의 최대 분수령이 될 전망이다."
-            }
+            bodyHtml: `
+              <p>1억 7천만 인구의 서남아시아 국가 방글라데시에서 15년간 이어진 셰이크 하시나 총리의 철권통치가 대학생들이 주도한 민중 봉기로 전격 붕괴했다. 독립유공자 자녀에게 공직의 30%를 몰아주는 공직 할당제 반대 시위로 촉발된 불꽃이 수주 만에 전국적인 반정부 혁명으로 번지며, 아시아 현대사에서 가장 극적인 정권 퇴진 드라마가 펼쳐졌다.</p>
+              
+              <p>정부의 무자비한 유혈 진압으로 대학생과 시민 1,000여 명이 목숨을 잃는 참극 속에서도 수백만 군중이 수도 다카의 총리 관저로 밀고 들어가자, 하시나 총리는 군용 헬기를 타고 인도로 긴급 도피했다. 성난 군중이 관저를 점령하고 독재자의 동상을 무너뜨린 직후, 시위를 이끈 20대 대학생 지도부의 강력한 요청으로 전 세계 빈민 구제의 영웅이자 노벨평화상 수상자인 무함마드 유누스(84) 박사가 과도정부 최고고문(총리 격)으로 전격 귀국하며 정권을 인수했다.</p>
+              
+              <p>방글라데시 학생들과 시민사회는 이번 사건을 1971년 파키스탄으로부터의 독립에 비견되는 '제2의 독립'으로 부르며 환호하고 있다. 15년간 사법부와 군부를 장악하고 야당 인사를 무더기 투옥하며 언론을 통제했던 권위주의 독재를 시민의 힘으로 직접 끌어내렸다는 자부심이다. 유누스 임시정부는 부패 관료 청산, 중앙은행 및 세제 개혁, 사법부 독립성 복원 등 국가 시스템 전반을 뜯어고치는 고강도 개혁 로드맵을 가동했다.</p>
+              
+              <p>그러나 혁명 뒤에 찾아온 현실은 녹록지 않다. 혁명 과정에서 독재의 하수인이었던 경찰력이 시민들의 보복을 피해 대거 근무지를 이탈하면서 치안 공백이 발생했고, 무슬림 다수 사회에서 힌두교 등 소수자 거주지가 공격받는 폭력 사태가 벌어지기도 했다. 또한 시위를 이끈 대학생 지도부 인사들이 임시정부 요직을 꿰차면서 '새로운 형태의 권력화'가 아니냐는 비판도 제기된다. 피신한 하시나 총리의 신병 인도를 두고 이웃 대국인 인도와의 외교적 긴장도 고조되는 양상이다.</p>
+              
+              <p>국내 언론에서는 단신으로 스쳐 지나갔지만, 외신들은 방글라데시의 'Z세대 혁명'을 고물가와 청년 실업, 기득권 부패에 분노한 개발도상국 청년 세대가 일궈낸 기념비적 사건으로 평가하고 있다. 세계적 경제학자 유누스가 이끄는 임시정부가 사회적 분열을 치유하고 공정한 선거를 치러 민주적 정부를 안착시킬 수 있을지 전 세계의 시선이 집중되고 있다.</p>
+            `
           }
         ]
       }
     ];
 
-    let currentEditionIdx = 0;
-    let currentArticleIdx = 0;
+    let currentCategoryIdx = 0;
 
-    // Formatting date
-    function getTodayString() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1;
-      const date = now.getDate();
-      const days = ["일", "월", "화", "수", "목", "금", "토"];
-      return `${year}년 ${month}월 ${date}일 (${days[now.getDay()]})`;
-    }
-
-    // Countdown
-    function updateCountdown() {
-      const now = new Date();
-      const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
-      const diffMs = midnight - now;
-
-      const hours = Math.floor(diffMs / (1000 * 60 * 60)).toString().padStart(2, "0");
-      const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, "0");
-      const secs = Math.floor((diffMs % (1000 * 60)) / 1000).toString().padStart(2, "0");
-
-      document.getElementById("countdownTimer").textContent = `${hours}:${mins}:${secs}`;
-    }
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
-
-    document.getElementById("currentDateDisplay").textContent = `📅 ${getTodayString()} 에디션`;
-
-    const tabsContainer = document.getElementById("pillarTabsContainer");
+    const tabsContainer = document.getElementById("categoryTabsContainer");
     const loadingOverlay = document.getElementById("loadingOverlay");
-    const updateBanner = document.getElementById("updateBanner");
 
-    // Render 3 Pillars Tabs
-    function renderPillarTabs() {
-      const edition = GLOBAL_EDITIONS[currentEditionIdx];
+    function renderCategoryTabs() {
       tabsContainer.innerHTML = "";
+      const articles = EDITIONS[0].articles;
 
-      edition.articles.forEach((art, idx) => {
+      articles.forEach((art, idx) => {
         const btn = document.createElement("button");
-        const isActive = idx === currentArticleIdx;
-        btn.className = `pillar-tab text-left p-3.5 rounded-xl border transition-all ${
+        const isActive = idx === currentCategoryIdx;
+        btn.className = `p-3 rounded-xl border text-left transition-all ${
           isActive 
             ? "tab-active border-emerald-500" 
             : "border-[var(--border)] bg-[var(--card)] hover:border-emerald-500/40"
         }`;
-        
+
         btn.innerHTML = `
-          <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="font-extrabold text-xs px-2 py-0.5 rounded ${
-              art.pillar.includes('국내') 
-                ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-                : art.pillar.includes('해외')
-                ? 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
-                : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
-            }">
-              ${art.pillarIcon} ${art.pillar}
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="font-bold text-xs px-2 py-0.5 rounded ${art.badgeColor}">
+              ${art.category}
             </span>
-            <span class="text-[var(--muted-foreground)] text-xs font-medium">외신 교차</span>
+            <span class="text-[var(--muted-foreground)] text-xs">기사</span>
           </div>
-          <div class="text-xs md:text-sm font-bold text-[var(--foreground)] line-clamp-1">
+          <div class="font-bold text-xs md:text-sm text-[var(--foreground)] line-clamp-1 mt-0.5">
             ${art.headline.split("…")[0]}
-          </div>
-          <div class="text-xs text-[var(--muted-foreground)] mt-1 line-clamp-1">
-            ${art.headline.split("…")[1] || art.summary.slice(0, 32)}
           </div>
         `;
 
         btn.addEventListener("click", () => {
-          currentArticleIdx = idx;
-          renderPillarTabs();
+          currentCategoryIdx = idx;
+          renderCategoryTabs();
           renderArticle(art);
         });
 
@@ -577,114 +383,106 @@
       });
     }
 
-    // Render Active Article
     function renderArticle(art) {
-      document.getElementById("badgeCategory").textContent = `${art.pillarIcon} ${art.pillar} • ${art.category}`;
+      document.getElementById("badgeCategory").textContent = art.category;
       document.getElementById("badgeOrigin").textContent = art.origin;
       document.getElementById("articleHeadline").textContent = art.headline;
-      document.getElementById("articleSummary").textContent = art.summary;
+      document.getElementById("articleSubheadline").textContent = art.subheadline;
 
-      // Facts
-      const factList = document.getElementById("factList");
-      factList.innerHTML = "";
-      art.facts.forEach(f => {
+      // Summary Bullets
+      const bulletsList = document.getElementById("summaryBullets");
+      bulletsList.innerHTML = "";
+      art.summaryBullets.forEach(b => {
         const li = document.createElement("li");
-        li.textContent = f;
-        factList.appendChild(li);
+        li.textContent = b;
+        bulletsList.appendChild(li);
       });
 
       // Perspectives
-      document.getElementById("perspectiveRightLabel").textContent = art.perspectives.right.label;
-      const rightList = document.getElementById("perspectiveRightList");
-      rightList.innerHTML = "";
-      art.perspectives.right.args.forEach(a => {
-        const li = document.createElement("li");
-        li.textContent = a;
-        rightList.appendChild(li);
-      });
+      document.getElementById("perspectiveRightTitle").textContent = art.perspectives.right.title;
+      document.getElementById("perspectiveRightText").textContent = art.perspectives.right.text || art.perspectives.right.args;
+      document.getElementById("perspectiveLeftTitle").textContent = art.perspectives.left.title;
+      document.getElementById("perspectiveLeftText").textContent = art.perspectives.left.text || art.perspectives.left.args;
 
-      document.getElementById("perspectiveLeftLabel").textContent = art.perspectives.left.label;
-      const leftList = document.getElementById("perspectiveLeftList");
-      leftList.innerHTML = "";
-      art.perspectives.left.args.forEach(a => {
-        const li = document.createElement("li");
-        li.textContent = a;
-        leftList.appendChild(li);
-      });
-
-      // Body Sections
-      document.getElementById("bodyLead").textContent = art.body.lead;
-      document.getElementById("bodyBackground").textContent = art.body.background;
-      document.getElementById("bodyConservative").textContent = art.body.cons;
-      document.getElementById("bodyProgressive").textContent = art.body.prog;
-      document.getElementById("bodyFuture").textContent = art.body.future;
+      // Real Newspaper Prose Body
+      document.getElementById("fullArticleBody").innerHTML = art.bodyHtml;
+      document.getElementById("articleByline").textContent = art.byline;
     }
 
-    // Refresh Action
-    function refreshFeed() {
-      const refreshIcon = document.getElementById("refreshIcon");
-      refreshIcon.classList.add("rotate-180");
+    // Refresh simulation
+    document.getElementById("btnAutoRefresh").addEventListener("click", () => {
+      const icon = document.getElementById("refreshIcon");
+      icon.classList.add("rotate-180");
       loadingOverlay.classList.remove("hidden");
 
       setTimeout(() => {
-        currentEditionIdx = (currentEditionIdx + 1) % GLOBAL_EDITIONS.length;
-        currentArticleIdx = 0;
-
-        renderPillarTabs();
-        renderArticle(GLOBAL_EDITIONS[currentEditionIdx].articles[0]);
-
+        currentCategoryIdx = (currentCategoryIdx + 1) % EDITIONS[0].articles.length;
+        renderCategoryTabs();
+        renderArticle(EDITIONS[0].articles[currentCategoryIdx]);
         loadingOverlay.classList.add("hidden");
-        refreshIcon.classList.remove("rotate-180");
+        icon.classList.remove("rotate-180");
+      }, 350);
+    });
 
-        updateBanner.classList.remove("hidden");
-        document.getElementById("updateBannerText").textContent =
-          `🔄 최신 [국내 1개 + 해외 1개 + 북한 1개] 중립 기사 세트(${GLOBAL_EDITIONS[currentEditionIdx].name})로 새로고침되었습니다!`;
-      }, 550);
-    }
+    // Archive Modal
+    const archiveModal = document.getElementById("archiveModal");
+    const archiveItemsList = document.getElementById("archiveItemsList");
 
-    document.getElementById("btnAutoRefresh").addEventListener("click", refreshFeed);
-    document.getElementById("btnCloseBanner").addEventListener("click", () => updateBanner.classList.add("hidden"));
+    document.getElementById("btnOpenArchive").addEventListener("click", () => {
+      archiveItemsList.innerHTML = "";
+      EDITIONS[0].articles.forEach((art, idx) => {
+        const item = document.createElement("div");
+        item.className = "p-3 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-emerald-500 cursor-pointer transition-all space-y-1";
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold px-2 py-0.5 rounded ${art.badgeColor}">${art.category}</span>
+            <span class="text-xs text-[var(--muted-foreground)]">${art.origin}</span>
+          </div>
+          <div class="text-sm font-bold text-[var(--foreground)]">${art.headline}</div>
+          <p class="text-xs text-[var(--muted-foreground)] line-clamp-1">${art.subheadline}</p>
+        `;
+        item.addEventListener("click", () => {
+          currentCategoryIdx = idx;
+          renderCategoryTabs();
+          renderArticle(art);
+          archiveModal.classList.add("hidden");
+        });
+        archiveItemsList.appendChild(item);
+      });
+      archiveModal.classList.remove("hidden");
+    });
+    document.getElementById("btnCloseArchive").addEventListener("click", () => archiveModal.classList.add("hidden"));
 
     // Copy & Download
     document.getElementById("btnCopy").addEventListener("click", () => {
-      const art = GLOBAL_EDITIONS[currentEditionIdx].articles[currentArticleIdx];
+      const art = EDITIONS[0].articles[currentCategoryIdx];
       const text = `${art.headline}\n\n` +
-        `[분류: ${art.pillar} | 출처: ${art.origin}]\n\n` +
-        `[1분 요약]\n${art.summary}\n\n` +
-        `[객관적 팩트]\n` + art.facts.map(f => `• ${f}`).join("\n") + `\n\n` +
-        `[1. 추진 배경]\n${art.body.background}\n\n` +
-        `[2. 추진/주류 시각]\n${art.body.cons}\n\n` +
-        `[3. 비판/대안 시각]\n${art.body.prog}\n\n` +
-        `[4. 향후 전망]\n${art.body.future}`;
-      navigator.clipboard.writeText(text).then(() => {
-        alert("기사가 클립보드에 복사되었습니다!");
-      });
+        `[3줄 요약]\n` + art.summaryBullets.map(b => `• ${b}`).join("\n") + `\n\n` +
+        `${art.byline}\n` +
+        document.getElementById("fullArticleBody").innerText;
+      navigator.clipboard.writeText(text).then(() => alert("기사 전문이 클립보드에 복사되었습니다!"));
     });
 
     document.getElementById("btnDownload").addEventListener("click", () => {
-      const art = GLOBAL_EDITIONS[currentEditionIdx].articles[currentArticleIdx];
+      const art = EDITIONS[0].articles[currentCategoryIdx];
       const md = `# ${art.headline}\n\n` +
-        `> **구분**: ${art.pillar} | **출처**: ${art.origin} | **발행**: ${getTodayString()}\n\n` +
-        `## 📌 요약\n${art.summary}\n\n` +
-        `## 🔍 객관적 사실관계 (Fact Sheet)\n` +
-        art.facts.map(f => `- ${f}`).join("\n") + `\n\n` +
-        `## 📰 중립 종합 기사 본문\n\n` +
-        `**[리드문]**\n${art.body.lead}\n\n` +
-        `### 1. 공통 사실관계 및 배경\n${art.body.background}\n\n` +
-        `### 2. 추진/주류 현실주의 시각\n${art.body.cons}\n\n` +
-        `### 3. 비판/대안적 시각\n${art.body.prog}\n\n` +
-        `### 4. 향후 전망 및 사회적 과제\n${art.body.future}\n`;
+        `> **분야**: ${art.category} | **출처**: ${art.origin}\n\n` +
+        `### 📌 핵심 3줄 요약\n` +
+        art.summaryBullets.map(b => `- ${b}`).join("\n") + `\n\n` +
+        `### 📰 기사 본문\n\n` +
+        `**${art.byline}**\n\n` +
+        document.getElementById("fullArticleBody").innerText + `\n`;
 
       const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `중립기사_${art.pillar.replace(/[^a-zA-Z0-9가-힣]/g, "")}_${Date.now()}.md`;
+      a.download = `기사_${art.category}.md`;
       a.click();
     });
 
-    // Initialize with first pillar
-    renderPillarTabs();
-    renderArticle(GLOBAL_EDITIONS[0].articles[0]);
+    // Initialize
+    renderCategoryTabs();
+    renderArticle(EDITIONS[0].articles[0]);
   </script>
 </body>
 </html>
