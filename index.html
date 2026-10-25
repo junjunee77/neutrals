@@ -15,13 +15,64 @@
       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     }
     .article-text {
-      line-height: 1.85;
-      letter-spacing: -0.015em;
+      line-height: 1.9;
+      letter-spacing: -0.018em;
+      word-break: keep-all;
     }
     .article-text p {
-      margin-bottom: 1.25rem;
-      text-align: justify;
+      margin-bottom: 1.35rem;
+      text-align: left;
     }
+    @media (min-width: 768px) {
+      .article-text p {
+        text-align: justify;
+      }
+    }
+    /* Korean '가' Font Resizing Classes */
+    .font-size-small, .font-size-small p {
+      font-size: 0.9375rem !important; /* 15px */
+      line-height: 1.85 !important;
+    }
+    .font-size-medium, .font-size-medium p {
+      font-size: 1.0625rem !important; /* 17px - Standard High Readability */
+      line-height: 1.95 !important;
+    }
+    .font-size-large, .font-size-large p {
+      font-size: 1.25rem !important; /* 20px - Large Senior & Clean View */
+      line-height: 2.1 !important;
+    }
+
+    /* Mobile Reader Optimized Mode */
+    body.mobile-reader-mode {
+      padding: 0.5rem !important;
+    }
+    body.mobile-reader-mode .max-w-4xl {
+      max-width: 100% !important;
+    }
+    body.mobile-reader-mode header {
+      padding: 1rem !important;
+      border-radius: 1.25rem !important;
+    }
+    body.mobile-reader-mode #articleContainer {
+      padding: 1.25rem 1rem !important;
+      border-radius: 1.25rem !important;
+    }
+    body.mobile-reader-mode .article-text p {
+      text-align: left !important;
+      word-break: keep-all !important;
+      margin-bottom: 1.55rem !important;
+      letter-spacing: -0.02em !important;
+    }
+    body.mobile-reader-mode #articleHeadline {
+      font-size: 1.35rem !important;
+      line-height: 1.4 !important;
+      letter-spacing: -0.025em !important;
+    }
+    body.mobile-reader-mode #articleSubheadline {
+      font-size: 0.875rem !important;
+      line-height: 1.6 !important;
+    }
+
     @keyframes pulse-subtle {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.6; }
@@ -33,44 +84,74 @@
   <div class="max-w-4xl mx-auto space-y-6">
 
     <!-- Top Navigation Header -->
-    <header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-5 shadow-sm transition-all">
+      <div class="flex flex-col gap-3 md:gap-4">
         
-        <!-- Brand -->
-        <div class="flex items-center gap-3.5">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white text-2xl shadow-md">
-            ⚖️
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="text-xl md:text-2xl font-bold tracking-tight text-[var(--foreground)]">BalanceNews AI</h1>
-              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 live-pulse"></span>
-                실시간 크롤링 &amp; 중립 엔진
-              </span>
+        <!-- Row 1: Brand Logo, Title & Mobile View Toggle -->
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white text-xl md:text-2xl shadow-md shrink-0">
+              ⚖️
             </div>
-            <p class="text-xs md:text-sm text-[var(--muted-foreground)] mt-0.5">
-              국내외 언론 및 외신(Reuters, BBC, CSIS)을 실시간 교차 검증하여 정통 신문 기사 형식의 중립 기사를 제공합니다.
-            </p>
+            <div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <h1 class="text-lg md:text-2xl font-bold tracking-tight text-[var(--foreground)]">BalanceNews AI</h1>
+                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 live-pulse"></span>
+                  실시간 중립 뉴스
+                </span>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-0.5 hidden sm:block">
+                국내외 언론 및 외신(Reuters, BBC, CSIS)을 실시간 교차 검증하여 5:5 정통 신문 기사를 제공합니다.
+              </p>
+            </div>
           </div>
+
+          <!-- Mobile Mode Toggle Icon (Top-Right on Mobile & Desktop) -->
+          <button id="btnMobileViewToggle" title="모바일 가독성 최적화 모드 (여백·줄간격·스마트폰 맞춤 가독성)" class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all border-[var(--border)] bg-[var(--background)] hover:border-emerald-500 text-[var(--muted-foreground)] shadow-xs">
+            <span class="text-sm">📱</span>
+            <span id="mobileViewLabel" class="text-xs font-medium">모바일 뷰</span>
+          </button>
         </div>
 
-        <!-- Controls -->
-        <div class="flex flex-wrap items-center gap-2">
-          <button id="backendStatusPill" title="클릭하여 백엔드 API 주소(Render 등)를 설정하거나 변경할 수 있습니다" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-mono bg-[var(--background)] border-[var(--border)] text-[var(--muted-foreground)] hover:border-emerald-500 cursor-pointer transition-colors">
-            <span id="backendStatusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span id="backendStatusText">오프라인 모드</span>
-            <span class="text-xs text-[var(--muted-foreground)]/60">⚙️</span>
-          </button>
+        <!-- Row 2: Controls Toolbar (Status, '가' Font Resizer, Action Buttons) -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2 border-t border-[var(--border)]/70">
+          
+          <!-- Left on Desktop / Top on Mobile: Status Pill & Korean '가' Font Sizer -->
+          <div class="flex items-center justify-between sm:justify-start gap-2">
+            <button id="backendStatusPill" title="클릭하여 백엔드 API 주소(Render 등)를 설정하거나 변경할 수 있습니다" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-mono bg-[var(--background)] border-[var(--border)] text-[var(--muted-foreground)] hover:border-emerald-500 cursor-pointer transition-colors shadow-xs">
+              <span id="backendStatusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span id="backendStatusText" class="truncate max-w-[130px] sm:max-w-none">오프라인 모드</span>
+              <span class="text-xs text-[var(--muted-foreground)]/60">⚙️</span>
+            </button>
 
-          <button id="btnLiveCrawl" class="px-3 py-2 text-xs md:text-sm font-semibold rounded-xl border border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100/50 transition-colors flex items-center gap-1.5 shadow-xs">
-            <span>📡 실시간 크롤링</span>
-          </button>
+            <!-- Korean '가' Font Resizer (작은 사이즈 / 중간 사이즈 / 큰 사이즈) -->
+            <div class="flex items-center rounded-xl border border-[var(--border)] p-0.5 bg-[var(--background)] shadow-xs" title="기사 본문 글자 크기 조절 (작게 / 보통 / 크게)">
+              <span class="text-xs text-[var(--muted-foreground)] px-1.5 hidden md:inline font-medium">글자</span>
+              <button data-font-size="small" title="본문 글자 작게 (15px)" class="font-size-btn px-2 py-1 rounded-lg transition-all text-xs font-bold text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                <span class="text-xs">가</span>
+              </button>
+              <button data-font-size="medium" title="본문 글자 보통 (17px 기본)" class="font-size-btn px-2.5 py-1 rounded-lg transition-all text-sm font-bold bg-emerald-600 text-white shadow-xs">
+                <span class="text-sm">가</span>
+              </button>
+              <button data-font-size="large" title="본문 글자 크게 (20px 큰글씨 뷰)" class="font-size-btn px-2.5 py-1 rounded-lg transition-all text-base font-black text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                <span class="text-lg leading-none">가</span>
+              </button>
+            </div>
+          </div>
 
-          <button id="btnAutoRefresh" class="px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all flex items-center gap-1.5">
-            <span id="refreshIcon" class="text-base transition-transform">🔄</span>
-            <span>다음 세트 새로고침</span>
-          </button>
+          <!-- Right on Desktop / Bottom on Mobile: Thumb-Friendly 50/50 Split Action Buttons -->
+          <div class="grid grid-cols-2 sm:flex sm:items-center gap-2">
+            <button id="btnLiveCrawl" class="px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl border border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100/50 transition-colors flex items-center justify-center gap-1.5 shadow-xs">
+              <span>📡 실시간 크롤링</span>
+            </button>
+
+            <button id="btnAutoRefresh" class="px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all flex items-center justify-center gap-1.5">
+              <span id="refreshIcon" class="text-base transition-transform">🔄</span>
+              <span>다음 세트</span>
+            </button>
+          </div>
+
         </div>
       </div>
 
@@ -126,11 +207,24 @@
             </span>
           </div>
 
-          <div class="flex items-center gap-2">
-            <button id="btnCopy" class="px-2.5 py-1 rounded-lg border border-[var(--border)] hover:bg-[var(--border)]/30 text-xs font-semibold flex items-center gap-1 transition-colors">
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Korean '가' Font Resizer in article action bar -->
+            <div class="flex items-center rounded-xl border border-[var(--border)] p-0.5 bg-[var(--background)] shadow-xs" title="기사 본문 글자 크기 조절">
+              <button data-font-size="small" title="글자 작게 (15px)" class="font-size-btn px-2 py-1 rounded-lg transition-all text-xs font-bold text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                <span class="text-xs">가</span>
+              </button>
+              <button data-font-size="medium" title="글자 보통 (17px)" class="font-size-btn px-2.5 py-1 rounded-lg transition-all text-sm font-bold bg-emerald-600 text-white shadow-xs">
+                <span class="text-sm">가</span>
+              </button>
+              <button data-font-size="large" title="글자 크게 (20px)" class="font-size-btn px-2.5 py-1 rounded-lg transition-all text-base font-black text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                <span class="text-lg leading-none">가</span>
+              </button>
+            </div>
+
+            <button id="btnCopy" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] hover:bg-[var(--border)]/30 text-xs font-semibold flex items-center gap-1 transition-colors">
               📋 복사
             </button>
-            <button id="btnDownload" class="px-2.5 py-1 rounded-lg border border-[var(--border)] hover:bg-[var(--border)]/30 text-xs font-semibold flex items-center gap-1 transition-colors">
+            <button id="btnDownload" class="px-2.5 py-1.5 rounded-xl border border-[var(--border)] hover:bg-[var(--border)]/30 text-xs font-semibold flex items-center gap-1 transition-colors">
               📥 저장
             </button>
           </div>
@@ -963,6 +1057,75 @@
     renderCategoryTabs();
     renderArticle(EDITIONS[0].articles[0]);
     checkBackendAndLoad();
+
+    // ============================================================
+    // 1. Font Size Manager ('가' 버튼 3단계: 작게, 보통, 크게)
+    // ============================================================
+    let currentFontSize = localStorage.getItem('neutral_news_font_size') || 'medium';
+
+    function setArticleFontSize(size) {
+      currentFontSize = size;
+      localStorage.setItem('neutral_news_font_size', size);
+
+      const articleBody = document.getElementById("fullArticleBody");
+      if (articleBody) {
+        articleBody.classList.remove("font-size-small", "font-size-medium", "font-size-large");
+        articleBody.classList.add(`font-size-${size}`);
+      }
+
+      // Sync active state on all '가' buttons across header & article toolbar
+      document.querySelectorAll("[data-font-size]").forEach(btn => {
+        const btnSize = btn.getAttribute("data-font-size");
+        if (btnSize === size) {
+          btn.className = "font-size-btn px-2.5 py-1 rounded-lg transition-all text-sm font-bold bg-emerald-600 text-white shadow-xs";
+        } else {
+          btn.className = "font-size-btn px-2 py-1 rounded-lg transition-all text-xs font-bold text-[var(--muted-foreground)] hover:text-[var(--foreground)]";
+        }
+      });
+    }
+
+    // Attach click listeners to all '가' buttons
+    document.querySelectorAll("[data-font-size]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        setArticleFontSize(btn.getAttribute("data-font-size"));
+      });
+    });
+
+    // ============================================================
+    // 2. Mobile Reader Mode Manager ('📱 모바일 뷰' 토글)
+    // ============================================================
+    const savedMobileMode = localStorage.getItem('neutral_news_mobile_mode');
+    let isMobileViewActive = savedMobileMode !== null ? savedMobileMode === 'true' : (window.innerWidth <= 640);
+
+    function applyMobileView(active) {
+      isMobileViewActive = active;
+      localStorage.setItem('neutral_news_mobile_mode', active);
+
+      const toggleBtn = document.getElementById("btnMobileViewToggle");
+      const label = document.getElementById("mobileViewLabel");
+
+      if (active) {
+        document.body.classList.add("mobile-reader-mode");
+        if (toggleBtn) {
+          toggleBtn.className = "px-2.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 shadow-xs";
+        }
+        if (label) label.textContent = "모바일ON";
+      } else {
+        document.body.classList.remove("mobile-reader-mode");
+        if (toggleBtn) {
+          toggleBtn.className = "px-2.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all border-[var(--border)] bg-[var(--background)] hover:border-emerald-500 text-[var(--muted-foreground)] shadow-xs";
+        }
+        if (label) label.textContent = "모바일 뷰";
+      }
+    }
+
+    document.getElementById("btnMobileViewToggle")?.addEventListener("click", () => {
+      applyMobileView(!isMobileViewActive);
+    });
+
+    // Apply saved preferences on boot
+    setArticleFontSize(currentFontSize);
+    applyMobileView(isMobileViewActive);
   </script>
 </body>
 </html>
