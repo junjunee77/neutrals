@@ -57,10 +57,11 @@
 
         <!-- Controls -->
         <div class="flex flex-wrap items-center gap-2">
-          <div id="backendStatusPill" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-mono bg-[var(--background)] border-[var(--border)] text-[var(--muted-foreground)]">
+          <button id="backendStatusPill" title="클릭하여 백엔드 API 주소(Render 등)를 설정하거나 변경할 수 있습니다" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-mono bg-[var(--background)] border-[var(--border)] text-[var(--muted-foreground)] hover:border-emerald-500 cursor-pointer transition-colors">
             <span id="backendStatusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
             <span id="backendStatusText">오프라인 모드</span>
-          </div>
+            <span class="text-xs text-[var(--muted-foreground)]/60">⚙️</span>
+          </button>
 
           <button id="btnOpenArchive" class="px-3 py-2 text-xs md:text-sm font-semibold rounded-xl border border-[var(--border)] hover:bg-[var(--card)]/80 transition-colors flex items-center gap-1.5 text-[var(--foreground)]">
             <span>📚 전체 기사 (16개)</span>
@@ -217,8 +218,13 @@
   </div>
 
   <script type="module">
-    // Backend API Configuration
-    const BACKEND_API_BASE = 'http://localhost:4000/api';
+    // Backend API Configuration (Supports Localhost & Render Cloud URL)
+    const urlParams = new URLSearchParams(window.location.search);
+    let configuredApi = urlParams.get('api') || localStorage.getItem('neutral_news_api_url') || 'http://localhost:4000';
+    if (!configuredApi.endsWith('/api')) {
+      configuredApi = configuredApi.replace(/\/+$/, '') + '/api';
+    }
+    const BACKEND_API_BASE = configuredApi;
     let isBackendConnected = false;
 
     // 4 Comprehensive Editions = 16 In-Depth Authentic Newspaper Articles
@@ -1009,6 +1015,16 @@
         if (statusText) statusText.textContent = "오프라인 모드";
       }
     }
+
+    // Click backend pill to change backend URL (e.g. Render cloud domain)
+    document.getElementById("backendStatusPill").addEventListener("click", () => {
+      const current = localStorage.getItem('neutral_news_api_url') || 'http://localhost:4000';
+      const input = prompt("연결할 백엔드 서버 URL을 입력하세요.\n(예: Render 클라우드 배포 주소 https://my-news-api.onrender.com 또는 http://localhost:4000)", current);
+      if (input !== null && input.trim() !== "") {
+        localStorage.setItem('neutral_news_api_url', input.trim());
+        location.reload();
+      }
+    });
 
     // Initialize with first edition
     renderCategoryTabs();

@@ -134,7 +134,7 @@ try {
     res.json(handleSynthesize(req.body || {}));
   });
 
-  expressApp.listen(PORT, () => {
+  expressApp.listen(PORT, '0.0.0.0', () => {
     console.log(`=======================================================`);
     console.log(`🚀 [Neutral News Express Backend] Server running!`);
     console.log(`📡 URL: http://localhost:${PORT}`);
@@ -220,7 +220,7 @@ try {
     res.end(JSON.stringify({ error: 'Endpoint not found', path: pathname }));
   });
 
-  server.listen(PORT, () => {
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`=======================================================`);
     console.log(`🚀 [Neutral News Native HTTP Backend] Server running!`);
     console.log(`📡 URL: http://localhost:${PORT}`);
