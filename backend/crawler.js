@@ -192,7 +192,7 @@ function synthesizeNeutralArticle(categoryKey, rawItem, fallbackData) {
             title: '야당 및 민생 진영 (민생 안전망·공공성)',
             text: '단기적 긴축과 공급자 중심 정책으로 인해 서민 및 취약계층에 가중되는 부담을 완화할 정밀한 보완책이 시급합니다.'
           }
-        ],
+        },
         bodyHtml: `
           <p>${cleanedTitle}을 둘러싸고 정책적 효율성과 사회적 분배 정의가 정면으로 맞서고 있다. 최근 발표된 당국의 정책 조정을 두고, 거시경제의 체질을 개선하고 잠재적 뇌관을 선제 차단해야 한다는 주장과 경기 침체기 취약계층의 주거·생활 사다리를 훼손한다는 비판이 팽팽히 맞서는 양상이다.</p>
           
@@ -227,7 +227,7 @@ function synthesizeNeutralArticle(categoryKey, rawItem, fallbackData) {
             title: '유럽 및 아시아 동맹권 (전략적 자율성·신뢰 훼손)',
             text: '일방적인 관세 장벽과 분담금 강요는 수십 년간 쌓아온 가치 동맹의 근간을 흔들고 진영 내 분열을 초래할 수 있습니다.'
           }
-        ],
+        },
         bodyHtml: `
           <p>${cleanedTitle} 사안을 계기로 전후 80년간 지속되어 온 서방 진영의 안보·경제 동맹 체제가 중대한 변곡점을 맞고 있다. 안보 비용의 균등 분담과 통상 불균형 해소를 요구하는 강대국의 압박과, 이에 맞서 독자 노선을 모색하는 전통 우방국 간의 신경전이 수면 위로 급부상했다.</p>
           
@@ -262,7 +262,7 @@ function synthesizeNeutralArticle(categoryKey, rawItem, fallbackData) {
             title: '외교 통일 전문가 및 평화 진영 (상황 관리·외교적 출구)',
             text: '강 대 강 군사적 대치만으로는 오판으로 인한 우발적 충돌 위험을 막을 수 없으며, 중국의 역할을 견인하는 외교적 공간을 열어야 합니다.'
           }
-        ],
+        },
         bodyHtml: `
           <p>${cleanedTitle} 사태가 한반도와 동북아 안보 지형을 근본적으로 뒤흔들고 있다. 최근 관측된 북한의 전략적 행보를 두고 군사 전문가들은 냉전 종식 이후 가장 엄중한 안보 위기 국면에 진입했다고 입을 모은다.</p>
           
@@ -297,7 +297,7 @@ function synthesizeNeutralArticle(categoryKey, rawItem, fallbackData) {
             title: '현지 민중 및 청년 혁명 진영 (기득권 타파·자원 주권)',
             text: '부패한 기득권과 식민 종주국의 착취를 끝내기 위한 자발적 민중 항쟁이며, 외부의 간섭 없는 온전한 주권 확립이 핵심입니다.'
           }
-        ],
+        },
         bodyHtml: `
           <p>국내 뉴스에서는 거의 다뤄지지 않지만, 지구 반대편에서는 한 국가의 운명을 송두리째 바꾸는 격렬한 내부 변혁의 물결이 일고 있다. 바로 ${cleanedTitle}을 둘러싸고 벌어지는 현지 시민사회와 지배 세력 간의 물러설 수 없는 한판 승부다.</p>
           
