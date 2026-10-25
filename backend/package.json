@@ -1,0 +1,25 @@
+{
+  "name": "neutral-news-backend",
+  "version": "1.0.0",
+  "description": "Neutral News AI - Node.js Express Backend & RSS Crawler Service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "neutral-news",
+    "express",
+    "rss-crawler",
+    "ai-news-synthesis",
+    "fact-check"
+  ],
+  "author": "Antigravity Pair Programmer",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "rss-parser": "^3.13.0"
+  }
+}

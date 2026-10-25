@@ -57,6 +57,11 @@
 
         <!-- Controls -->
         <div class="flex flex-wrap items-center gap-2">
+          <div id="backendStatusPill" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-mono bg-[var(--background)] border-[var(--border)] text-[var(--muted-foreground)]">
+            <span id="backendStatusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span id="backendStatusText">오프라인 모드</span>
+          </div>
+
           <button id="btnOpenArchive" class="px-3 py-2 text-xs md:text-sm font-semibold rounded-xl border border-[var(--border)] hover:bg-[var(--card)]/80 transition-colors flex items-center gap-1.5 text-[var(--foreground)]">
             <span>📚 전체 기사 (16개)</span>
           </button>
@@ -212,8 +217,12 @@
   </div>
 
   <script type="module">
+    // Backend API Configuration
+    const BACKEND_API_BASE = 'http://localhost:4000/api';
+    let isBackendConnected = false;
+
     // 4 Comprehensive Editions = 16 In-Depth Authentic Newspaper Articles
-    const EDITIONS = [
+    let EDITIONS = [
       // Edition 1
       {
         name: "에디션 1 (부동산 · 대서양 방위비 · 북러 파병 · 방글라데시 7월 혁명)",
@@ -834,23 +843,53 @@
       }, 350);
     });
 
-    // Live Real-Time Crawling Simulation Action
-    document.getElementById("btnLiveCrawl").addEventListener("click", () => {
+    // Live Real-Time Crawling Action (Backend API + Seamless Offline Fallback)
+    document.getElementById("btnLiveCrawl").addEventListener("click", async () => {
       liveCrawlToast.classList.remove("hidden");
-      liveCrawlStatusText.textContent = "📡 실시간 구글뉴스·로이터·BBC 최신 피드 수집 및 팩트체크 분석 중...";
+      liveCrawlStatusText.textContent = "📡 실시간 외신(로이터·BBC·구글뉴스) RSS 피드 수집 및 팩트 분석 중...";
 
-      setTimeout(() => {
-        liveCrawlStatusText.textContent = "⚖️ 수집된 기사의 진보/보수 편향 어휘 제거 및 5:5 신문 기사체 합성 완료!";
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const res = await fetch(`${BACKEND_API_BASE}/news/crawl`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.status === 'success' && data.edition) {
+            liveCrawlStatusText.textContent = "⚖️ [백엔드 연동 성공] 외신 RSS 수집 및 편향 어휘 제거 5:5 신문 기사체 합성 완료!";
+
+            // Update status indicator
+            const statusDot = document.getElementById("backendStatusDot");
+            const statusText = document.getElementById("backendStatusText");
+            if (statusDot) statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+            if (statusText) statusText.textContent = "백엔드 연동됨 (:4000)";
+
+            setTimeout(() => {
+              EDITIONS.unshift(data.edition);
+              currentEditionIdx = 0;
+              currentCategoryIdx = 0;
+              renderCategoryTabs();
+              renderArticle(EDITIONS[0].articles[0]);
+              updatedTimeBadge.textContent = `실시간 백엔드 크롤링 완료 (${getCurrentTimeString()})`;
+              setTimeout(() => liveCrawlToast.classList.add("hidden"), 1200);
+            }, 600);
+            return;
+          }
+        }
+        throw new Error("Backend response error");
+      } catch (err) {
+        // Smooth fallback to local curated sets
+        liveCrawlStatusText.textContent = "⚖️ [오프라인 모드] 로컬 기사 세트 교차 분석 및 5:5 합성 전환 완료 (서버: cd backend && npm start)";
         setTimeout(() => {
-          // Switch to fresh live edition
           currentEditionIdx = (currentEditionIdx + 1) % EDITIONS.length;
           currentCategoryIdx = 0;
           renderCategoryTabs();
           renderArticle(EDITIONS[currentEditionIdx].articles[0]);
-          updatedTimeBadge.textContent = `방금 실시간 크롤링 완료 (${getCurrentTimeString()})`;
-          liveCrawlToast.classList.add("hidden");
-        }, 1200);
-      }, 1000);
+          updatedTimeBadge.textContent = `기사 세트 전환 완료 (${getCurrentTimeString()})`;
+          setTimeout(() => liveCrawlToast.classList.add("hidden"), 1500);
+        }, 1000);
+      }
     });
 
     document.getElementById("btnCloseToast").addEventListener("click", () => {
@@ -932,9 +971,49 @@
       a.click();
     });
 
+    // Check backend health and load latest news on boot
+    async function checkBackendAndLoad() {
+      const statusDot = document.getElementById("backendStatusDot");
+      const statusText = document.getElementById("backendStatusText");
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch(`${BACKEND_API_BASE}/news`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (data && data.status === 'success') {
+          isBackendConnected = true;
+          if (statusDot) statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+          if (statusText) statusText.textContent = "백엔드 연동됨 (:4000)";
+
+          if (data.currentEdition && data.currentEdition.articles) {
+            const foundIdx = EDITIONS.findIndex(e => e.id === data.currentEdition.id);
+            if (foundIdx === -1) {
+              EDITIONS.unshift(data.currentEdition);
+              currentEditionIdx = 0;
+            } else {
+              currentEditionIdx = foundIdx;
+            }
+          }
+          renderCategoryTabs();
+          renderArticle(EDITIONS[currentEditionIdx].articles[currentCategoryIdx]);
+          updatedTimeBadge.textContent = `백엔드 실시간 동기화 완료 (${getCurrentTimeString()})`;
+        }
+      } catch (err) {
+        isBackendConnected = false;
+        if (statusDot) statusDot.className = "w-2 h-2 rounded-full bg-amber-400";
+        if (statusText) statusText.textContent = "오프라인 모드";
+      }
+    }
+
     // Initialize with first edition
     renderCategoryTabs();
     renderArticle(EDITIONS[0].articles[0]);
+    checkBackendAndLoad();
   </script>
 </body>
 </html>
