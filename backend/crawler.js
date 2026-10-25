@@ -315,12 +315,16 @@ function synthesizeNeutralArticle(categoryKey, rawItem, fallbackData) {
   }
 }
 
+// Rotation counter so consecutive live crawls pick different trending news from RSS feeds
+let crawlRotationCounter = 0;
+
 /**
  * Main Crawler Orchestrator
  * Crawls feeds across all 4 categories and returns a fully synthesized edition.
  */
 async function crawlAllCategories(currentCuratedEditions = []) {
-  console.log('[Crawler] Starting real-time RSS fetch across 4 categories...');
+  crawlRotationCounter++;
+  console.log(`[Crawler] Starting real-time RSS fetch (rotation #${crawlRotationCounter}) across 4 categories...`);
 
   // Fallback to first curated edition if available
   const defaultFallback = (currentCuratedEditions[0] && currentCuratedEditions[0].articles) || [];
@@ -332,42 +336,47 @@ async function crawlAllCategories(currentCuratedEditions = []) {
     exoticDomestic: null
   };
 
-  // 1. Crawl Domestic
+  // 1. Crawl Domestic (Pick varying top stories from Google News Nation/Business)
   try {
-    const domesticItems = await fetchRssFeed(RSS_FEEDS.domestic[0].url);
+    const feed = RSS_FEEDS.domestic[crawlRotationCounter % RSS_FEEDS.domestic.length];
+    const domesticItems = await fetchRssFeed(feed.url);
     if (domesticItems && domesticItems.length > 0) {
-      results.domestic = domesticItems[0];
+      const idx = crawlRotationCounter % Math.min(domesticItems.length, 7);
+      results.domestic = domesticItems[idx];
     }
   } catch (e) {
     console.error('Domestic crawl error:', e.message);
   }
 
-  // 2. Crawl International
+  // 2. Crawl International (Pick varying top stories from Google News World & BBC)
   try {
-    const intlItems = await fetchRssFeed(RSS_FEEDS.international[0].url);
+    const feed = RSS_FEEDS.international[crawlRotationCounter % RSS_FEEDS.international.length];
+    const intlItems = await fetchRssFeed(feed.url);
     if (intlItems && intlItems.length > 0) {
-      results.international = intlItems[0];
+      const idx = (crawlRotationCounter * 2) % Math.min(intlItems.length, 7);
+      results.international = intlItems[idx];
     }
   } catch (e) {
     console.error('International crawl error:', e.message);
   }
 
-  // 3. Crawl North Korea
+  // 3. Crawl North Korea (Pick varying search items)
   try {
     const nkItems = await fetchRssFeed(RSS_FEEDS.northKorea[0].url);
     if (nkItems && nkItems.length > 0) {
-      results.northKorea = nkItems[0];
+      const idx = (crawlRotationCounter * 3) % Math.min(nkItems.length, 6);
+      results.northKorea = nkItems[idx];
     }
   } catch (e) {
     console.error('North Korea crawl error:', e.message);
   }
 
-  // 4. Crawl Exotic Domestic (Unusual Faraway Foreign Domestic Affairs)
+  // 4. Crawl Exotic Domestic (Bangladesh, Kenya, Georgia, Sahel, Bolivia, Sudan, etc.)
   try {
     const exoticItems = await fetchRssFeed(RSS_FEEDS.exoticDomestic[0].url);
     if (exoticItems && exoticItems.length > 0) {
-      // Pick a distinctive story if possible
-      results.exoticDomestic = exoticItems[0];
+      const idx = (crawlRotationCounter * 2 + 1) % Math.min(exoticItems.length, 8);
+      results.exoticDomestic = exoticItems[idx];
     }
   } catch (e) {
     console.error('Exotic domestic crawl error:', e.message);

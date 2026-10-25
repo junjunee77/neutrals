@@ -864,13 +864,14 @@
         if (res.ok) {
           const data = await res.json();
           if (data && data.status === 'success' && data.edition) {
-            liveCrawlStatusText.textContent = "⚖️ [백엔드 연동 성공] 외신 RSS 수집 및 편향 어휘 제거 5:5 신문 기사체 합성 완료!";
+            const headlinePreview = data.edition.articles[0].headline.slice(0, 22);
+            liveCrawlStatusText.textContent = `⚖️ [실시간 외신 수집 완료] "${headlinePreview}..." 및 4대 분야 5:5 신문 기사체 합성 완료!`;
 
             // Update status indicator
             const statusDot = document.getElementById("backendStatusDot");
             const statusText = document.getElementById("backendStatusText");
             if (statusDot) statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-            if (statusText) statusText.textContent = "백엔드 연동됨 (:4000)";
+            if (statusText) statusText.textContent = "클라우드 연동됨 (Render)";
 
             setTimeout(() => {
               EDITIONS.unshift(data.edition);
@@ -878,8 +879,8 @@
               currentCategoryIdx = 0;
               renderCategoryTabs();
               renderArticle(EDITIONS[0].articles[0]);
-              updatedTimeBadge.textContent = `실시간 백엔드 크롤링 완료 (${getCurrentTimeString()})`;
-              setTimeout(() => liveCrawlToast.classList.add("hidden"), 1200);
+              updatedTimeBadge.textContent = `방금 실시간 속보 수집 완료 (${getCurrentTimeString()})`;
+              setTimeout(() => liveCrawlToast.classList.add("hidden"), 1800);
             }, 600);
             return;
           }
