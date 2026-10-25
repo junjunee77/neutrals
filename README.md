@@ -45,36 +45,41 @@
 
 ```bash
 neutral-news-ai/
-├── index.html               # 독립 실행 가능한 대화형 웹 플랫폼 UI (Tailwind CSS 기반)
-├── README.md                # 시스템 명세 및 운영 가이드라인
-├── src/
-│   ├── analyzer.js          # 편향 어휘 감지, 스코어링, 합성 엔진
-│   ├── prompts.py           # LLM(Gemini / GPT / Claude)용 저널리즘 프롬프트 템플릿
-│   └── data/
-│       └── samples.json     # 한국 사회 주요 쟁점 좌/우 실제 기사 데이터셋
-└── backend/
-    └── app.py               # FastAPI 기반 REST API 서비스 백엔드
+├── index.html               # 반응형 정통 신문 웹 플랫폼 (Tailwind CSS, 4개 카테고리 뷰)
+├── README.md                # 시스템 명세 및 가이드라인
+├── deploy.sh                # 깃허브 1클릭 자동 배포 스크립트
+├── backend/
+│   ├── package.json         # Node.js 백엔드 패키지 설정 (Express, CORS, RSS-Parser)
+│   ├── server.js            # Node.js Express & Native HTTP REST API 서버 (:4000)
+│   ├── crawler.js           # 외신(로이터, BBC, 구글뉴스) 실시간 RSS 크롤러 & 5:5 합성 엔진
+│   ├── editions.js          # 4개 에디션 총 16개 정통 신문 기사 라이브러리
+│   └── README.md            # 백엔드 API 상세 명세서
+└── src/
+    └── analyzer.js          # 클라이언트 편향 어휘 필터 및 점수 분석 엔진
 ```
 
 ---
 
 ## 🚀 4. 실행 및 사용 방법 (How to Run)
 
-### 방법 A. 웹 UI 즉시 체험 (무설치)
-1. `index.html` 파일을 웹 브라우저(Chrome, Safari, Edge 등)로 엽니다.
-2. 상단 핫이슈 프리셋(금투세 논란, 의대 2,000명 증원, 원전 vs 재생에너지)을 클릭하여 좌우 기사를 로드합니다.
-3. **`⚖️ 좌우 기사 분석 및 중립 기사 생성`** 버튼을 클릭하면 실시간 4단계 파이프라인 분석과 중립 기사가 생성됩니다.
-4. **`📋 기사 복사`** 또는 **`📥 마크다운 저장`**을 통해 결과물을 활용할 수 있습니다.
+### 방법 A. 웹 UI 즉시 체험 (무설치/오프라인)
+1. `index.html` 파일을 브라우저로 엽니다 (`open index.html` 또는 파일 더블클릭).
+2. 기본 내장된 4대 분야(`국내`, `해외`, `북한`, `이색 해외`) 총 16개 정통 신문 기사를 자유롭게 탐색할 수 있습니다.
+3. 백엔드가 실행되어 있지 않아도 오프라인 모드로 안전하게 작동합니다.
 
-### 방법 B. Python 백엔드 API 연동
+### 방법 B. Node.js Express 백엔드 API 및 실시간 크롤링 연동
 ```bash
-# 가상환경 생성 및 패키지 설치
-pip install fastapi uvicorn pydantic
-
-# 백엔드 서버 구동
+# 1. 백엔드 폴더로 이동
 cd backend
-python3 -m uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+
+# 2. 의존성 설치 및 서버 실행
+npm install
+npm start
+# (또는 node server.js 로 즉시 실행)
 ```
+- 서버가 실행되면 `http://localhost:4000`에서 REST API가 활성화됩니다.
+- 브라우저의 웹 화면 상단에 **`🟢 백엔드 연동됨 (:4000)`** 뱃지가 표시됩니다.
+- **`📡 실시간 크롤링`** 버튼을 누르면 구글뉴스, 로이터, BBC 등 실제 RSS 피드를 수집하여 5:5 중립 기사로 즉시 합성합니다.
 
 ---
 
