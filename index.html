@@ -218,9 +218,10 @@
   </div>
 
   <script type="module">
-    // Backend API Configuration (Supports Localhost & Render Cloud URL)
+    // Cloud Production Backend on Render
+    const DEFAULT_CLOUD_API = 'https://neutrals.onrender.com';
     const urlParams = new URLSearchParams(window.location.search);
-    let configuredApi = urlParams.get('api') || localStorage.getItem('neutral_news_api_url') || 'http://localhost:4000';
+    let configuredApi = urlParams.get('api') || localStorage.getItem('neutral_news_api_url') || DEFAULT_CLOUD_API;
     if (!configuredApi.endsWith('/api')) {
       configuredApi = configuredApi.replace(/\/+$/, '') + '/api';
     }
@@ -982,9 +983,11 @@
       const statusDot = document.getElementById("backendStatusDot");
       const statusText = document.getElementById("backendStatusText");
 
+      if (statusText) statusText.textContent = "클라우드 서버 연결 중...";
+
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
         const res = await fetch(`${BACKEND_API_BASE}/news`, { signal: controller.signal });
         clearTimeout(timeoutId);
 
@@ -994,7 +997,7 @@
         if (data && data.status === 'success') {
           isBackendConnected = true;
           if (statusDot) statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-          if (statusText) statusText.textContent = "백엔드 연동됨 (:4000)";
+          if (statusText) statusText.textContent = "클라우드 연동됨 (Render)";
 
           if (data.currentEdition && data.currentEdition.articles) {
             const foundIdx = EDITIONS.findIndex(e => e.id === data.currentEdition.id);
@@ -1007,7 +1010,7 @@
           }
           renderCategoryTabs();
           renderArticle(EDITIONS[currentEditionIdx].articles[currentCategoryIdx]);
-          updatedTimeBadge.textContent = `백엔드 실시간 동기화 완료 (${getCurrentTimeString()})`;
+          updatedTimeBadge.textContent = `클라우드 실시간 동기화 (${getCurrentTimeString()})`;
         }
       } catch (err) {
         isBackendConnected = false;
@@ -1016,10 +1019,10 @@
       }
     }
 
-    // Click backend pill to change backend URL (e.g. Render cloud domain)
+    // Click backend pill to change backend URL (e.g. Render cloud domain or localhost)
     document.getElementById("backendStatusPill").addEventListener("click", () => {
-      const current = localStorage.getItem('neutral_news_api_url') || 'http://localhost:4000';
-      const input = prompt("연결할 백엔드 서버 URL을 입력하세요.\n(예: Render 클라우드 배포 주소 https://my-news-api.onrender.com 또는 http://localhost:4000)", current);
+      const current = localStorage.getItem('neutral_news_api_url') || DEFAULT_CLOUD_API;
+      const input = prompt("연결할 백엔드 서버 URL을 입력하세요:\n(기본값: https://neutrals.onrender.com 또는 로컬 테스트: http://localhost:4000)", current);
       if (input !== null && input.trim() !== "") {
         localStorage.setItem('neutral_news_api_url', input.trim());
         location.reload();
